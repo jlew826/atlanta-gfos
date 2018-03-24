@@ -1,11 +1,9 @@
 const express       =   require('express'),
       bodyParser    =   require('body-parser'),
-      mysql         =   require('mysql'),
+      db            =   require('./database.js'),
       crypto        =   require('crypto'),
       config        =   require('../config.js'),
       api           =   express();
-
-const pool = mysql.createPool(config.mysql_settings);
 
 api.use(bodyParser.json());
 api.use(bodyParser.urlencoded({extended: true}));
@@ -14,41 +12,28 @@ api.use(bodyParser.urlencoded({extended: true}));
     Attempt to login with email and password
 */
 api.post('/api/users/login', function(req, res) {
-    pool.getConnection(function(err, con) {
-        if(err) {
-            res.send(err);
-            con.release();
+    // Get users with provided emails
+    db.select('*', 'USER', { email: req.body.email }).then(function(users) {
+        // If no users match the email, user does not exist
+        if(typeof users == "undefined" || users.length == 0) {
+            res.status(403).send("No user with email " + req.body.email);
             return;
         }
-        // Get users with provided emails
-        let sql = "SELECT * FROM USER WHERE email = ?";
-        let inserts = [req.body.email];
-        con.query(sql, inserts, function(err, result) {
-            let data = JSON.parse(JSON.stringify(result))[0];
-            con.release();
-            if(err) {
-                res.send(err);
-                return;
-            }
-            // If no users match the email, user does not exist
-            if(typeof result == "undefined" || result.length == 0) {
-                res.send("No user with email " + req.body.email);
-                return;
-            }
-            // Otherwise, hash password and compare with stored one
-            let hash = crypto.createHash('sha256');
-            hash.update(req.body.password);
-            if(data.password == hash.digest('base64')) {
-                res.send(JSON.stringify({
-                    username: data.username,
-                    email: data.email,
-                    account_type: data.account_type
-                }));
-            }
-            else {
-                res.send("Incorrect password");
-            }
-        });
+        // Otherwise, hash password and compare with stored one
+        let hash = crypto.createHash('sha256');
+        hash.update(req.body.password);
+        if(users[0].password == hash.digest('base64')) {
+            res.status(200).send({
+                username: users[0].username,
+                email: users[0].email,
+                account_type: users[0].account_type
+            });
+        }
+        else {
+            res.status(403).send("Incorrect password");
+        }
+    }).catch(function(err) {
+        res.status(500).send(err);
     });
 });
 
@@ -57,9 +42,9 @@ api.post('/api/users/login', function(req, res) {
 */
 api.post('/api/visitors', function(req, res) {
     createUser(req.body, 'Visitor').then(function(result) {
-        res.send("Success");
+        res.status(200).send("Success");
     }).catch(function(err) {
-        res.send(err);
+        res.status(500).send(err);
     });
 });
 
@@ -71,12 +56,81 @@ api.post('/api/owners', function(req, res) {
     createUser(req.body.owner, 'Owner').then(function(result) {
         // Then create property
         createProperty(req.body.property, req.body.owner.username).then(function(prop_result) {
-            res.send("Success");
+            res.status(200).send("Success");
         }).catch(function(err) {
-            res.send(err);
+            res.status(500).send(err);
         });
     }).catch(function(err) {
-        res.send(err);
+        res.status(500).send(err);
+    });
+});
+
+/**
+    Get a list of properties with specified filters
+*/
+api.get('/api/properties', function(req, res) {
+    let filter = {};
+    for(let attr in req.query) {
+        if(req.query.hasOwnProperty(attr)) {
+            if(attr == "confirmed") {
+                filter["approved_by_admin"] = (req.query[attr] == "true" ? "not null" : "null");
+            }
+            else if(attr == "public") {
+                filter["is_public"] = (req.query[attr] == 'true' ? 1 : 0);
+            }
+            else if(attr == "commercial") {
+                filter["is_commercial"] = (req.query[attr] == 'true' ? 1 : 0);
+            }
+            else {
+                filter[attr] = req.query[attr];
+            }
+        }
+    }
+    db.select(`
+                name,
+                property_id,
+                CAST(is_commercial AS UNSIGNED) AS is_commercial,
+                CAST(is_public AS UNSIGNED) AS is_public,
+                approved_by_admin,
+                size,
+                owner_id,
+                st_address,
+                city,
+                zip,
+                type
+              `,
+              'PROPERTY',
+              filter
+    ).then(function(properties) {
+        res.status(200).send(properties);
+    }).catch(function(err) {
+        res.status(500).send(err);
+    });
+});
+
+/**
+    Get property with specified id
+*/
+api.get('/api/properties/:propid', function(req, res) {
+    db.select(`
+                name,
+                property_id,
+                CAST(is_commercial AS UNSIGNED) AS is_commercial,
+                CAST(is_public AS UNSIGNED) AS is_public,
+                approved_by_admin,
+                size,
+                owner_id,
+                st_address,
+                city,
+                zip,
+                type
+              `,
+              'PROPERTY',
+              { property_id: parseInt(req.params.propid) }
+    ).then(function(properties) {
+        res.status(200).send(properties[0]);
+    }).catch(function(err) {
+        res.status(500).send(err);
     });
 });
 
@@ -88,51 +142,26 @@ console.log(`Server running on ${config.api.url}:${config.api.port}`);
 */
 function createUser(args, type) {
     return new Promise(function(resolve, reject) {
-        pool.getConnection(function(err, con) {
-            if(err) {
-                con.release();
-                reject(err);
+        db.select('*', 'USER', `username = '${args.username}' OR email = '${args.email}'`).then(function(users) {
+            if(typeof users != "undefined" && users.length > 0) {
+                reject("User with the given email or username already exists");
                 return;
             }
-            // Check to make sure no other user exists with either the same username or email
-            let sql = "SELECT * FROM USER WHERE username = ? OR email = ?";
-            let inserts = [
-                args.username,
-                args.email
-            ];
-            con.query(sql, inserts, function(err, result) {
-                if(err) {
-                    con.release();
-                    reject(err);
-                    return;
-                }
-                if(typeof result != "undefined" && result.length > 0) {
-                    con.release();
-                    reject("User with the given email or username already exists");
-                    return;
-                }
-                // Insert new user with hashed password
-                let sql = "INSERT INTO USER (username, email, password, account_type) VALUES (?)";
-                let hash = crypto.createHash('sha256');
-                hash.update(args.password);
-                let inserts = [
-                    [
-                        args.username,
-                        args.email,
-                        hash.digest('base64'),
-                        type
-                    ]
-                ];
-                con.query(sql, inserts, function(err, result) {
-                    con.release();
-                    if(err) {
-                        reject(err);
-                        return;
-                    }
-                    resolve(result);
-                    return;
-                });
+            if(args.password.length < 8) {
+                reject("Password must be at least 8 characters long");
+                return;
+            }
+            let hash = crypto.createHash('sha256');
+            db.insert('USER', ['username', 'email', 'password', 'account_type'], [args.username, args.email, hash.digest('base64'), type]).then(function(result) {
+                resolve(result);
+                return;
+            }).catch(function(err) {
+                reject(err);
+                return;
             });
+        }).catch(function(err) {
+            reject(err);
+            return;
         });
     });
 }
@@ -142,130 +171,87 @@ function createUser(args, type) {
 */
 function createProperty(args, ownerid) {
     return new Promise(function(resolve, reject) {
-        pool.getConnection(function(err, con) {
-            if(err) {
-                con.release();
-                reject(err);
-                return;
-            }
-            // First, create new property
-            let sql = "INSERT INTO PROPERTY (name, is_commercial, is_public, approved_by_admin, size, owner_id, st_address, city, zip, type) VALUES (?)";
-            let inserts = [
-                [
-                    args.name,
-                    args.is_commercial,
-                    args.is_public,
-                    null,
-                    args.size,
-                    ownerid,
-                    args.st_address,
-                    args.city,
-                    args.zip,
-                    args.type
-                ]
-            ];
-            con.query(sql, inserts, function(err, result) {
-                if(err) {
-                    con.release();
-                    reject(err);
-                    return;
-                }
-                // Get property_id of newly created property
-                let sql = "SELECT property_id FROM PROPERTY WHERE name = ?";
-                inserts = [ args.name ];
-                new Promise(function(resolve, reject) {
-                    con.query(sql, inserts, function(err, result) {
-                        if(err) {
-                            con.release();
-                            reject(err);
-                            return;
-                        }
-                        resolve(JSON.parse(JSON.stringify(result))[0].property_id);
-                        return;
-                    });
-                }).then(function(propid) {
-                    if(args.type == "Farm") {
-                        // Check if farm animal exists and create it if it doesn't
-                        new Promise(function(resolve, reject) {
-                            let sql = "SELECT * FROM FARM_ITEM WHERE name = ?";
-                            let inserts = [ args.animal ];
-                            con.query(sql, inserts, function(err, result) {
-                                if(err) {
-                                    con.release();
-                                    reject(err);
-                                    return;
-                                }
-                                if(typeof result != "undefined" && result.length > 0) {
-                                    resolve();
-                                    return;
-                                }
-                                // Animal doesn't exist, create it
-                                createFarmItem(args.animal, "Animal").then(function(res) {
-                                    resolve(res);
+        db.insert('PROPERTY', ['name', 'is_commercial', 'is_public', 'approved_by_admin', 'size', 'owner_id', 'st_address', 'city', 'zip', 'type'],
+                              [args.name, args.is_commercial, args.is_public, null, args.size, ownerid, args.st_address, args.city, args.zip, args.type])
+        .then(function(result) {
+            db.select('property_id', 'PROPERTY', { name: args.name }).then(function(properties) {
+                if(args.type == "Farm") {
+                    // Check if farm animal exists and create it if it doesn't
+                    db.select('*', 'FARM_ITEM', { name: args.animal }).then(function(farmitems) {
+                        if(typeof farmitems == "undefined" || farmitems.length == 0) {
+                            // Animal doesn't exist, create it
+                            createFarmItem(args.animal, "Animal").then(function(result) {
+                                // Link animal with property
+                                addFarmItemToProperty(args.animal, properties[0].property_id).then(function(result) {
+                                    resolve(result);
                                 }).catch(function(err) {
                                     reject(err);
+                                    return;
                                 });
+                            }).catch(function(err) {
+                                reject(err);
+                                return;
                             });
-                        }).then(function() {
+                        }
+                        else {
                             // Link animal with property
-                            addFarmItemToProperty(args.animal, propid).then(function() {
-                                resolve("Success");
+                            addFarmItemToProperty(args.animal, properties[0].property_id).then(function(result) {
+                                resolve(result);
                             }).catch(function(err) {
                                 reject(err);
-                            });
-                        }).catch(function(err) {
-                            reject(err);
-                        });
-                    }
-                    // Check that Orchards only grow fruits and nuts
-                    else if(args.type == "Orchard" && (args.crop.type == "Vegetable" || args.crop.type == "Flower")) {
-                        con.release();
-                        reject("Orchards can only grow Fruits and Nuts");
-                        return;
-                    }
-                    // Check that Gardens only grow vegetables and flowers
-                    else if(args.type == "Garden" && (args.crop.type == "Fruit" || args.crop.type == "Nut")) {
-                        con.release();
-                        reject("Gardens can only grow Vegetables and Flowers");
-                        return;
-                    }
-                    // By this point the crop specified is valid for the property specified; create crop and link to property
-                    new Promise(function(resolve, reject) {
-                        // Check if crop exists
-                        let sql = "SELECT * FROM FARM_ITEM WHERE name = ?";
-                        let inserts = [ args.crop.name ];
-                        con.query(sql, inserts, function(err, result) {
-                            con.release();
-                            if(err) {
-                                con.release();
-                                reject(err);
                                 return;
-                            }
-                            if(typeof result != "undefined" && result.length > 0) {
-                                resolve();
-                                return;
-                            }
-                            // Crop doesn't exist, create it
-                            createFarmItem(args.crop.name, args.crop.type).then(function(res) {
-                                resolve(res);
-                            }).catch(function(err) {
-                                reject(err);
                             });
-                        });
-                    }).then(function() {
-                        // Link crop with property
-                        addFarmItemToProperty(args.crop.name, propid).then(function() {
-                            resolve("Success");
-                        }).catch(function(err) {
-                            reject(err);
-                        });
+                        }
                     }).catch(function(err) {
                         reject(err);
+                        return;
                     });
+                }
+                // Check that Orchards only grow fruits and nuts
+                else if(args.type == "Orchard" && (args.crop.type == "Vegetable" || args.crop.type == "Flower")) {
+                    reject("Orchards can only grow Fruits and Nuts");
+                    return;
+                }
+                // Check that Gardens only grow vegetables and flowers
+                else if(args.type == "Garden" && (args.crop.type == "Fruit" || args.crop.type == "Nut")) {
+                    reject("Gardens can only grow Vegetables and Flowers");
+                    return;
+                }
+                // By this point the crop specified is valid for the property specified; create crop and link to property
+                // Check if crop exists
+                db.select('*', 'FARM_ITEM', { name: args.crop.name }).then(function(farmitems) {
+                    if(typeof farmitems == "undefined" || farmitems.length == 0) {
+                        // Crop doesn't exist, create it
+                        createFarmItem(args.crop.name, args.crop.type).then(function(result) {
+                            // Link crop with property
+                            addFarmItemToProperty(args.crop.name, properties[0].property_id).then(function(result) {
+                                resolve(result);
+                            }).catch(function(err) {
+                                reject(err);
+                            });
+                        }).catch(function(err) {
+                            reject(err);
+                        });
+                    }
+                    else {
+                        // Link crop with property
+                        addFarmItemToProperty(args.crop.name, propid).then(function(result) {
+                            resolve(result);
+                        }).catch(function(err) {
+                            reject(err);
+                        });
+                    }
                 }).catch(function(err) {
                     reject(err);
+                    return;
                 });
+            }).catch(function(err) {
+                reject(err);
+                return;
             });
+        }).catch(function(err) {
+            reject(err);
+            return;
         });
     });
 }
@@ -274,54 +260,12 @@ function createProperty(args, ownerid) {
     Create farm item from name and type
 */
 function createFarmItem(name, type) {
-    return new Promise(function(resolve, reject) {
-        pool.getConnection(function(err, con) {
-            if(err) {
-                con.release();
-                reject(err);
-                return;
-            }
-            let sql = "INSERT INTO FARM_ITEM (name, status, type) VALUES (?)";
-            let inserts = [
-                [ name, 0, type ]
-            ];
-            con.query(sql, inserts, function(err, result) {
-                con.release();
-                if(err) {
-                    reject(err);
-                    return;
-                }
-                resolve(result);
-                return;
-            });
-        });
-    });
+    return db.insert('FARM_ITEM', ['name', 'status', 'type'], [name, 0, type]);
 }
 
 /**
     Link farm item and property given the name and id
 */
 function addFarmItemToProperty(farmItem, propertyId) {
-    return new Promise(function(resolve, reject) {
-        pool.getConnection(function(err, con) {
-            if(err) {
-                con.release();
-                reject(err);
-                return;
-            }
-            let sql = "INSERT INTO GROWS_RAISES (property_id, farm_item_name) VALUES (?)";
-            let inserts = [
-                [ propertyId, farmItem ]
-            ];
-            con.query(sql, inserts, function(err, result) {
-                con.release();
-                if(err) {
-                    reject(err);
-                    return;
-                }
-                resolve(result);
-                return;
-            });
-        });
-    });
+    return db.insert('GROWS_RAISES', ['property_id', 'farm_item_name'], [propertyId, farmItem]);
 }
