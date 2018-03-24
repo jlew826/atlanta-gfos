@@ -134,6 +134,199 @@ api.get('/api/properties/:propid', function(req, res) {
     });
 });
 
+/**
+    Get farm items, optionally filter by status
+*/
+api.get('/api/farm_items', function(req, res) {
+    let filter = {};
+    if(typeof req.query['confirmed'] !== 'undefined') {
+        filter.status = (req.query['confirmed'] == 'true' ? 1 : 0);
+    }
+    db.select(`name, CAST(status AS UNSIGNED) AS status, type`, 'FARM_ITEM', filter).then(function(animals) {
+        res.status(200).send(animals);
+    }).catch(function(err) {
+        res.status(500).send(err);
+    });
+});
+
+/**
+    Get all animals, optionally filter by status
+*/
+api.get('/api/animals', function(req, res) {
+    let filter = { type: 'Animal' };
+    if(typeof req.query['confirmed'] !== 'undefined') {
+        filter.status = (req.query['confirmed'] == 'true' ? 1 : 0);
+    }
+    db.select(`name, CAST(status AS UNSIGNED) AS status, type`, 'FARM_ITEM', filter).then(function(animals) {
+        res.status(200).send(animals);
+    }).catch(function(err) {
+        res.status(500).send(err);
+    });
+});
+
+/**
+    Get all crops, optionally filter by status
+*/
+api.get('/api/crops', function(req, res) {
+    let filter = `type = 'Fruit' OR type = 'Nut' OR type = 'Vegetable' OR type = 'Flower'`;
+    if(typeof req.query['confirmed'] !== 'undefined') {
+        filter = `(${filter}) AND status = ${req.query['confirmed'] == 'true' ? 1 : 0}`;
+    }
+    db.select(`name, CAST(status AS UNSIGNED) AS status, type`, 'FARM_ITEM', filter).then(function(animals) {
+        res.status(200).send(animals);
+    }).catch(function(err) {
+        res.status(500).send(err);
+    });
+});
+
+/**
+    Get orchard crops, optionally filter by status
+*/
+api.get('/api/crops/orchard', function(req, res) {
+    let filter = `type = 'Fruit' OR type = 'Nut'`;
+    if(typeof req.query['confirmed'] !== 'undefined') {
+        filter = `(${filter}) AND status = ${req.query['confirmed'] == 'true' ? 1 : 0}`;
+    }
+    db.select(`name, CAST(status AS UNSIGNED) AS status, type`, 'FARM_ITEM', filter).then(function(animals) {
+        res.status(200).send(animals);
+    }).catch(function(err) {
+        res.status(500).send(err);
+    });
+});
+
+/**
+    Get garden crops, optionally filter by status
+*/
+api.get('/api/crops/garden', function(req, res) {
+    let filter = `type = 'Vegetable' OR type = 'Flower'`;
+    if(typeof req.query['confirmed'] !== 'undefined') {
+        filter = `(${filter}) AND status = ${req.query['confirmed'] == 'true' ? 1 : 0}`;
+    }
+    db.select(`name, CAST(status AS UNSIGNED) AS status, type`, 'FARM_ITEM', filter).then(function(animals) {
+        res.status(200).send(animals);
+    }).catch(function(err) {
+        res.status(500).send(err);
+    });
+});
+
+/**
+    Get all fruits, optionally filter by status
+*/
+api.get('/api/crops/fruits', function(req, res) {
+    let filter = { type: 'Fruit' };
+    if(typeof req.query['confirmed'] !== 'undefined') {
+        filter.status = (req.query['confirmed'] == 'true' ? 1 : 0);
+    }
+    db.select(`name, CAST(status AS UNSIGNED) AS status, type`, 'FARM_ITEM', filter).then(function(animals) {
+        res.status(200).send(animals);
+    }).catch(function(err) {
+        res.status(500).send(err);
+    });
+});
+
+/**
+    Get all nuts, optionally filter by status
+*/
+api.get('/api/crops/nuts', function(req, res) {
+    let filter = { type: 'Nut' };
+    if(typeof req.query['confirmed'] !== 'undefined') {
+        filter.status = (req.query['confirmed'] == 'true' ? 1 : 0);
+    }
+    db.select(`name, CAST(status AS UNSIGNED) AS status, type`, 'FARM_ITEM', filter).then(function(animals) {
+        res.status(200).send(animals);
+    }).catch(function(err) {
+        res.status(500).send(err);
+    });
+});
+
+/**
+    Get all vegetables, optionally filter by status
+*/
+api.get('/api/crops/vegetables', function(req, res) {
+    let filter = { type: 'Vegetable' };
+    if(typeof req.query['confirmed'] !== 'undefined') {
+        filter.status = (req.query['confirmed'] == 'true' ? 1 : 0);
+    }
+    db.select(`name, CAST(status AS UNSIGNED) AS status, type`, 'FARM_ITEM', filter).then(function(animals) {
+        res.status(200).send(animals);
+    }).catch(function(err) {
+        res.status(500).send(err);
+    });
+});
+
+/**
+    Get all flowers, optionally filter by status
+*/
+api.get('/api/crops/flowers', function(req, res) {
+    let filter = { type: 'Flower' };
+    if(typeof req.query['confirmed'] !== 'undefined') {
+        filter.status = (req.query['confirmed'] == 'true' ? 1 : 0);
+    }
+    db.select(`name, CAST(status AS UNSIGNED) AS status, type`, 'FARM_ITEM', filter).then(function(animals) {
+        res.status(200).send(animals);
+    }).catch(function(err) {
+        res.status(500).send(err);
+    });
+});
+
+/**
+    Request a new animal
+*/
+api.post('/api/animals', function(req, res) {
+    db.select('*', 'USER', { username: req.body.username }).then(function(users) {
+        let status = 0;
+        if(typeof users !== 'undefined' && users.length > 0 && users[0].account_type == 'Admin') {
+            status = 1;
+        }
+        db.insert('FARM_ITEM', ['name', 'status', 'type'], [req.body.name, status, 'Animal']).then(function(result) {
+            res.status(200).send("Success");
+        }).catch(function(err) {
+            res.status(500).send(err);
+        });
+    }).catch(function(err) {
+        res.status(500).send(err);
+    });
+});
+
+/**
+    Request a new crop
+*/
+api.post('/api/crops', function(req, res) {
+    db.select('*', 'USER', { username: req.body.username }).then(function(users) {
+        let status = 0;
+        if(typeof users !== 'undefined' && users.length > 0 && users[0].account_type == 'Admin') {
+            status = 1;
+        }
+        db.insert('FARM_ITEM', ['name', 'status', 'type'], [req.body.name, status, req.body.type]).then(function(result) {
+            res.status(200).send("Success");
+        }).catch(function(err) {
+            res.status(500).send(err);
+        });
+    }).catch(function(err) {
+        res.status(500).send(err);
+    });
+});
+
+/**
+    Validate crop or animal
+*/
+api.put('/api/farm_items/:id', function(req, res) {
+    db.select('*', 'USER', {username: req.body.username }).then(function(users) {
+        if(typeof users !== 'undefined' && users.length > 0 && users[0].account_type == 'Admin') {
+            db.update('FARM_ITEM', ['status'], [1], { name: req.params.id }).then(function(result) {
+                res.status(200).send("Success");
+            }).catch(function(err) {
+                res.status(500).send(err);
+            });
+        }
+        else {
+            res.status(403).send("Unauthorized action");
+        }
+    }).catch(function(err) {
+        res.status(500).send(err);
+    });
+});
+
 api.listen(config.api.port);
 console.log(`Server running on ${config.api.url}:${config.api.port}`);
 

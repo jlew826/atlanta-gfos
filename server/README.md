@@ -133,3 +133,76 @@ Response:
     "type": "Farm"
 }
 ```
+
+### Farm Items Getters
+Send a `GET` request to any of the following paths to get the relevant types of crops:
+- `/api/animals` - get all animals
+- `/api/crops` - get all crops
+- `/api/crops/orchard` - get all fruits and nuts
+- `/api/crops/garden` - get all vegetables and flowers
+- `/api/crops/fruits` - get all fruits
+- `/api/crops/nuts` - get all nuts
+- `/api/crops/vetetables` - get all vegetables
+- `/api/crops/flowers` - get all flowers
+Optionally, you can include a filter for status.
+Request:
+```
+GET /api/crops?confirmed=true
+```
+Response:
+```
+[
+    {
+        "name": "Tomato",
+        "status": 1,
+        "type": "Fruit"
+    },
+    {
+        "name": "Cucumber",
+        "status": 1,
+        "type": "Vegetable"
+    }
+]
+```
+
+### Request New Animal
+Request:
+```
+POST /api/animals
+{
+    "name": "Pig",
+    "username": "owner123"
+}
+```
+Response:
+```
+Success
+```
+
+### Request New Crop
+Request:
+```
+POST /api/crops
+{
+    "name": "Potato",
+    "type": "Vegetable",
+    "username": "admin1"
+}
+```
+Response:
+```
+Success
+```
+
+### Validate Farm Item
+Request:
+```
+PUT /api/farm_items/Potato
+{
+    "username": "admin1"
+}
+```
+Response:
+```
+Success
+```
