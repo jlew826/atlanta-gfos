@@ -86,21 +86,19 @@ api.get('/api/properties', function(req, res) {
             }
         }
     }
-    db.select(`
-                name,
-                property_id,
-                CAST(is_commercial AS UNSIGNED) AS is_commercial,
-                CAST(is_public AS UNSIGNED) AS is_public,
-                approved_by_admin,
-                size,
-                owner_id,
-                st_address,
-                city,
-                zip,
-                type
-              `,
-              'PROPERTY',
-              filter
+    db.custom(`SELECT
+                   p.name,
+                   p.st_address,
+                   p.city,
+                   p.zip,
+                   p.size,
+                   p.type,
+                   CAST(p.is_commercial AS UNSIGNED) AS is_commercial,
+                   CAST(p.is_public AS UNSIGNED) AS is_public,
+                   p.property_id,
+                   (SELECT COUNT(*) FROM VISITS WHERE property_id = p.property_id) AS 'num_visits',
+                   (SELECT AVG(score) FROM VISITS WHERE property_id = p.property_id) AS 'avg_rating'
+               FROM PROPERTY p`
     ).then(function(properties) {
         res.status(200).send(properties);
     }).catch(function(err) {
@@ -112,22 +110,23 @@ api.get('/api/properties', function(req, res) {
     Get property with specified id
 */
 api.get('/api/properties/:propid', function(req, res) {
-    db.select(`
-                name,
-                property_id,
-                CAST(is_commercial AS UNSIGNED) AS is_commercial,
-                CAST(is_public AS UNSIGNED) AS is_public,
-                approved_by_admin,
-                size,
-                owner_id,
-                st_address,
-                city,
-                zip,
-                type
-              `,
-              'PROPERTY',
-              { property_id: parseInt(req.params.propid) }
-    ).then(function(properties) {
+    db.custom(`SELECT
+                   p.name,
+                   u.username,
+                   u.email,
+                   (SELECT COUNT(*) FROM VISITS WHERE property_id = p.property_id) AS 'num_visits',
+                   p.st_address,
+                   p.city,
+                   p.zip,
+                   p.size,
+                   (SELECT AVG(score) FROM VISITS WHERE property_id = p.property_id) AS 'avg_rating',
+                   p.type,
+                   CAST(p.is_public AS UNSIGNED) AS is_public,
+                   CAST(p.is_commercial AS UNSIGNED) AS is_commercial,
+                   p.property_id
+               FROM PROPERTY p INNER JOIN USER u ON p.owner_id = u.username
+               WHERE p.property_id = ?
+    `, [ req.params.propid ]).then(function(properties) {
         res.status(200).send(properties[0]);
     }).catch(function(err) {
         res.status(500).send(err);
@@ -354,10 +353,89 @@ api.delete('/api/properties/:id/visits', function(req, res) {
     Get all properties that a visitor has visited
 */
 api.get('/api/visitors/:id/visits', function(req, res) {
-    db.select(['p.name', 'v.score', 'v.date_added'],
+    db.select(['p.property_id', 'p.name', 'v.score', 'v.date_added'],
               [`PROPERTY p NATURAL JOIN (SELECT * FROM VISITS WHERE visitor_id = '${req.params.id}') v`]
              ).then(function(visits) {
         res.status(200).send(visits);
+    }).catch(function(err) {
+        res.status(500).send(err);
+    });
+});
+
+/**
+    Remove all visits from a visitor's history
+*/
+api.delete('/api/visitors/:id/visits', function(req, res) {
+    db.remove('VISITS', { visitor_id: req.params.id }).then(function(result) {
+        res.status(200).send("Success");
+    }).catch(function(err) {
+        res.status(500).send(err);
+    });
+});
+
+/**
+    Get a list of all users
+*/
+api.get('/api/users', function(req, res) {
+    db.select(['username', 'email', 'account_type'], 'USER').then(function(users) {
+        res.status(200).send(users);
+    }).catch(function(err) {
+        res.status(500).send(err);
+    });
+});
+
+/**
+    Get a list of all visitors
+*/
+api.get('/api/visitors', function(req, res) {
+    db.custom("SELECT u.username, u.email, (SELECT COUNT(*) FROM VISITS WHERE visitor_id = u.username) AS 'logged_visits' FROM USER u WHERE u.account_type = 'Visitor'")
+    .then(function(users) {
+        res.status(200).send(users);
+    }).catch(function(err) {
+        res.status(500).send(err);
+    });
+});
+
+/**
+    Get a list of all owners
+*/
+api.get('/api/owners', function(req, res) {
+    db.custom("SELECT u.username, u.email, (SELECT COUNT(*) FROM PROPERTY WHERE owner_id = u.username) AS 'num_properties' FROM USER u WHERE u.account_type = 'Owner'")
+    .then(function(users) {
+        res.status(200).send(users);
+    }).catch(function(err) {
+        res.status(500).send(err);
+    });
+});
+
+/**
+    Get info about a user given a username
+*/
+api.get('/api/users/:id', function(req, res) {
+    db.select(['username', 'email', 'account_type'], 'USER', { username: req.params.id }).then(function(users) {
+        res.status(200).send(users[0]);
+    }).catch(function(err) {
+        res.status(500).send(err);
+    });
+});
+
+/**
+    Remove user
+*/
+api.delete('/api/users/:id', function(req, res) {
+    db.remove('USER', { username: req.params.id }).then(function(result) {
+        res.status(200).send("Success");
+    }).catch(function(err) {
+        res.status(500).send(err);
+    });
+});
+
+/**
+    Remove property
+*/
+api.delete('/api/properties/:id', function(req, res) {
+    db.remove('PROPERTY', { property_id: parseInt(req.params.id) }).then(function(result) {
+        res.status(200).send("Success");
     }).catch(function(err) {
         res.status(500).send(err);
     });

@@ -189,9 +189,31 @@ function remove(table, conditions) {
     });
 }
 
+function custom(sql, inserts) {
+    return new Promise(function(resolve, reject) {
+        pool.getConnection(function(err, connection) {
+            if(err) {
+                connection.release();
+                reject(err);
+                return;
+            }
+            connection.query(sql, inserts, function(err, result) {
+                connection.release();
+                if(err) {
+                    reject(err);
+                    return;
+                }
+                resolve(result);
+                return;
+            });
+        });
+    });
+}
+
 module.exports = {
     select,
     insert,
     update,
-    remove
+    remove,
+    custom
 };
