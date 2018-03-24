@@ -14,12 +14,18 @@ function select(fields, table, conditions) {
             let sql = "";
             let inserts = [];
             if(fields instanceof Array) {
-                sql = "SELECT ?? FROM ??";
-                inserts = [ fields, table ];
+                sql = "SELECT ??";
+                inserts = [ fields ];
             }
             else {
-                sql = `SELECT ${fields} FROM ??`;
-                inserts = [ table ];
+                sql = `SELECT ${fields}`;
+            }
+            if(table instanceof Array) {
+                sql = `${sql} FROM ${table[0]}`;
+            }
+            else {
+                sql = `${sql} FROM ??`;
+                inserts.push(table);
             }
             if(typeof conditions !== "undefined" && Object.keys(conditions).length > 0) {
                 sql += " WHERE ";

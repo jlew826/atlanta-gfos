@@ -327,6 +327,42 @@ api.put('/api/farm_items/:id', function(req, res) {
     });
 });
 
+/**
+    Log visit to property
+*/
+api.post('/api/properties/:id/visits', function(req, res) {
+    db.insert('VISITS', ['visitor_id', 'property_id', 'score', 'date_added'],
+                        [req.body.username, parseInt(req.params.id), req.body.score, new Date()]).then(function(result) {
+        res.status(200).send("Success");
+    }).catch(function(err) {
+        res.status(500).send(err);
+    });
+});
+
+/**
+    Remove logged visit from property
+*/
+api.delete('/api/properties/:id/visits', function(req, res) {
+    db.remove('VISITS', { visitor_id: req.body.username, property_id: parseInt(req.params.id) }).then(function(result) {
+        res.status(200).send("Success");
+    }).catch(function(err) {
+        res.status(500).send(err);
+    });
+});
+
+/**
+    Get all properties that a visitor has visited
+*/
+api.get('/api/visitors/:id/visits', function(req, res) {
+    db.select(['p.name', 'v.score', 'v.date_added'],
+              [`PROPERTY p NATURAL JOIN (SELECT * FROM VISITS WHERE visitor_id = '${req.params.id}') v`]
+             ).then(function(visits) {
+        res.status(200).send(visits);
+    }).catch(function(err) {
+        res.status(500).send(err);
+    });
+});
+
 api.listen(config.api.port);
 console.log(`Server running on ${config.api.url}:${config.api.port}`);
 

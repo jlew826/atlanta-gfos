@@ -8,6 +8,13 @@ Issue HTTP requests to the backend service to make changes to the database.
 3. [Owner Registration](#owner-registration)
 4. [Get Properties by Filter](#get-properties-by-filter)
 5. [Get Property by PropertyID](#get-property-by-propertyid)
+6. [Farm Items Getters](#farm-items-getters)
+7. [Request New Animal](#request-new-animal)
+8. [Request New Crop](#request-new-crop)
+9. [Validate Farm Item](#validate-farm-item)
+10. [Log Visit to Property](#log-visit-to-property)
+11. [Remove Logged Visit from Property](#remove-logged-visit-from-property)
+12. [Get Properties Visited by a Visitor](#get-properties-visited-by-a-visitor)
 
 
 ### User Login
@@ -143,8 +150,8 @@ Send a `GET` request to any of the following paths to get the relevant types of 
 - `/api/crops/fruits` - get all fruits
 - `/api/crops/nuts` - get all nuts
 - `/api/crops/vetetables` - get all vegetables
-- `/api/crops/flowers` - get all flowers
-Optionally, you can include a filter for status.
+- `/api/crops/flowers` - get all flowers  
+Optionally, you can include a filter for status.  
 Request:
 ```
 GET /api/crops?confirmed=true
@@ -205,4 +212,52 @@ PUT /api/farm_items/Potato
 Response:
 ```
 Success
+```
+
+### Log Visit to Property
+Request:
+```
+POST /api/properties/00001/visits
+{
+    "username": "visitor1",
+    "score": 3
+}
+```
+Response:
+```
+Success
+```
+
+### Remove Logged Visit from Property
+Request:
+```
+DELETE /api/properties/00001/visits
+{
+    "username": "visitor1"
+}
+```
+Response:
+```
+Success
+```
+
+### Get Properties Visited by a Visitor
+Request:
+```
+GET /api/visitors/:id/visits
+```
+Response:
+```
+[
+    {
+        "name": "Propname1",
+        "score": 3,
+        "date": "2018-03-24T04:00:00.000Z"
+    },
+    {
+        "name": "Propname2",
+        "score": 5,
+        "date": "2018-03-24T04:00:00.000Z"
+    }
+]
 ```
