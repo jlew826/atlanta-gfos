@@ -1,3 +1,4 @@
 config.js
 server/package-lock.json
 server/node_modules
+.DS_Store
