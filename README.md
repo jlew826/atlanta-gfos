@@ -11,6 +11,7 @@ An app for keeping track of gardens, farms, and orchards in the Atlanta area, al
 ### To start the app
 ```
 cd server
+npm install
 node api.js
 ```
 
