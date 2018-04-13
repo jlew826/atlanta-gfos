@@ -1,0 +1,34 @@
+<div ng-controller="ViewPropertiesCtrl" style="padding-left: 5px">
+    <h3>View Properties</h3>
+
+    <input type="text" ng-model="query" placeholder="Filter by any attribute... "
+        style="font-size: 20px; height:75px; width: 400px; margin:0px auto; display:block; margin-bottom: 20px !important">
+    <table class="table table-hover">
+        <tr>
+            <th>Name</th>
+            <th>Address</th>
+            <th>City</th>
+            <th>Zip</th>
+            <th>Type</th>
+            <th>Public</th>
+            <th>Commercial</th>
+            <th>ID</th>
+            <th>Visits</th>
+            <th>Average Rating</th>
+        </tr>
+        <!--<tr ng-repeat="cf in confirmedProperties | filter: { is_public: 1, is_commercial: 1 }">-->
+        <tr ng-repeat="cf in confirmedProperties | filter: search | filter:  { is_public: 1, is_commercial: 1 }" ng-click='viewPropertyDetail(cf.property_id)'>
+            <td>{{cf.name}}</td>
+            <td>{{cf.st_address}}</td>
+            <td>{{cf.city}}</td>
+            <td>{{cf.zip}}</td>
+            <td>{{cf.type}}</td>
+            <td>{{cf.is_public}}</td>
+            <td>{{cf.is_commercial}}</td>
+            <td>{{cf.property_id}}</td>
+            <td>{{cf.num_visits}}</td>
+            <td>{{cf.avg_rating}}</td>
+        </tr>
+    </table>
+
+</div>

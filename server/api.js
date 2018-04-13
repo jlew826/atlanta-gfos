@@ -3,10 +3,20 @@ const express       =   require('express'),
       db            =   require('./database.js'),
       crypto        =   require('crypto'),
       config        =   require('../config.js'),
+      path          =   require('path'),
       api           =   express();
 
+api.use(bodyParser.urlencoded({'extended':'true'}));
 api.use(bodyParser.json());
-api.use(bodyParser.urlencoded({extended: true}));
+api.use(bodyParser.json({ type: 'application/vnd.api+json' }));
+
+
+api.use("/public", express.static(__dirname + "/public"));
+api.use("/node_modules", express.static(__dirname + "/node_modules"));
+
+api.get('/', function(req, res) {
+    res.sendFile(path.join(__dirname + '/public/index.html'));
+});
 
 /**
     Attempt to login with email and password
@@ -15,14 +25,15 @@ api.post('/api/users/login', function(req, res) {
     // Get users with provided emails
     let hash = crypto.createHash('sha256');
     hash.update(req.body.password);
+    let dig = hash.digest('base64');
     db.query(`
         SELECT
             username, email, account_type
         FROM USER
         WHERE email = ? AND password = ?
-    `, [ req.body.email, hash.digest('base64') ]).then(function(users) {
+    `, [req.body.email, dig]).then(function(users) { //TODO: get this working with email instead of username.
         if(typeof users == "undefined" || users.length == 0) {
-            res.status(403).send("Incorrect username or password");
+            res.status(403).send("Incorrect username or password : " + dig);
             return;
         }
         else {
@@ -1011,6 +1022,7 @@ api.delete('/api/properties/:id', function(req, res) {
         res.status(500).send(err);
     });
 });
+
 
 api.listen(config.api.port);
 console.log(`Server running on ${config.api.url}:${config.api.port}`);

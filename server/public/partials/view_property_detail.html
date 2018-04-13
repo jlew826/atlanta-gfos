@@ -1,0 +1,14 @@
+<div style="padding-left:20px;">
+    <h1><u>{{property.name}} Details</u></h1>
+    <p><b>Name: </b>{{property.name}}</p>
+    <p><b>Address: </b>{{property.st_address}}</p>
+    <p><b>City: </b>{{property.city}}</p>
+    <p><b>Zip: </b>{{property.zip}}</p>
+    <p><b>Type: </b>{{property.type}}</p>
+    <p><b>Public: </b> {{property.is_public ? "True" : "False"}}</p>
+    <p><b>Commercial: </b> {{property.is_commercial ? "True" : "False"}}</p>
+    <p><b>ID: </b> {{property.property_id}}</p>
+    <p><b>Visits: </b>{{property.num_visits}}</p>
+    <p><b>Average Rating: </b>{{property.avg_rating == null ? "No Ratings" : property.avg_rating}}</p>
+    <p><b>Crops: </b>{{property.crops}}</p>
+</div>

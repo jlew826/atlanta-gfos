@@ -1,0 +1,25 @@
+<html>
+    <head>
+        <script src="/node_modules/angular/angular.js"></script>
+        <script src="/node_modules/@uirouter/angularjs/release/angular-ui-router.js"></script>
+        <script src="/node_modules/angular-resource/angular-resource.js"></script>
+        <link href="/node_modules/bootstrap/dist/css/bootstrap.css" rel="stylesheet">
+
+        <script src="/public/app.js"></script>
+        <script src="/public/factories/factories.js"></script>
+        <script src="/public/controllers/LoginController.js"></script>
+        <script src="/public/controllers/RegisterController.js"></script>
+        <script src="/public/controllers/ViewPropertiesController.js"></script>
+        <script src="/public/controllers/ViewPropertyDetailController.js"></script>
+    </head>
+    
+    <body ng-app="app">
+        <!--<a ui-sref="hello" ui-sref-active="active">Hello</a>
+        <a ui-sref="about" ui-sref-active="active">About</a>-->
+        <p ng-if="currentUser">Currently logged in as <b>{{currentUser.account_type}}</b> {{currentUser.username}}.<hr></p>
+
+        <!--<a ui-sref="login" ui-sref-active="active">Login</a>-->
+
+        <ui-view></ui-view>
+    </body>
+</html>
