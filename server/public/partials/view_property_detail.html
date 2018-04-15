@@ -11,4 +11,18 @@
     <p><b>Visits: </b>{{property.num_visits}}</p>
     <p><b>Average Rating: </b>{{property.avg_rating == null ? "No Ratings" : property.avg_rating}}</p>
     <p><b>Crops: </b>{{property.crops}}</p>
+
+    <div ng-if="currentUserType === 'Visitor'">
+        <button ng-show="property.is_visited" ng-click="unlogVisit()">Un-Log Visit</button>
+
+        <button ng-hide="property.is_visited" ng-click="logVisit()">Log Visit</button>
+        <select ng-hide="property.is_visited" ng-model="score.selected" ng-options="value.id as value.value for value in options">
+            <option value=""></option>
+        </select>
+        <p ng-show="!property.is_visited && logError" style="color:red">
+            Please select a valid rating and try again.
+        </p>
+    </div>
+
+    <button ui-sref="view_properties">Back</button>
 </div>

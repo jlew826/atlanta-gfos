@@ -48,6 +48,13 @@ app.factory('PropertyFactory', function($resource) {
 		}
 	});
 
+    return $resource('/api/properties/confirmed', {}, {
+		getConfirmedProperties: {
+			method: 'GET',
+            isArray: true
+		}
+	});
+
     //get specific property
     return $resource('/api/properties/:property_id/', {}, {
 		getPropertyById: {
@@ -57,12 +64,53 @@ app.factory('PropertyFactory', function($resource) {
 	});
 });
 
+//visitor's view
 app.factory('PropertyDetailFactory', function($resource) {
-    //get specific property
-    return $resource('/api/properties/:property_id/', {}, {
-		getPropertyById: {
+    //get visitor view of specific property
+    return $resource('/api/visitors/:visitor_id/properties/:property_id', {}, {
+		getVisitorViewOfProperty: {
 			method: 'GET',
-            params: { property_id: '@property_id'}
+            params: {
+                visitor_id: '@visitor_id',
+                property_id: '@property_id'
+            }
+		}
+	});
+});
+
+app.factory('VisitLoggerFactory', function($resource) {
+    return $resource('/api/properties/:property_id/visits', {}, {
+		logVisit: {
+			method: 'POST',
+			params: {
+                username: '@username',
+                score: '@score',
+                property_id: '@property_id'
+            }
+		},
+
+        unlogVisit: {
+			method: 'DELETE',
+			params: {
+                username: '@username',
+                property_id: '@property_id'
+            },
+            hasBody: true,
+            headers: {"Content-Type": "application/json;charset=UTF-8"}
+		}
+	});
+});
+
+
+app.factory('VisitHistoryFactory', function($resource) {
+    //get visitor view of specific property
+    return $resource('/api/visitors/:username/visits', {}, {
+		getVisitHistory: {
+			method: 'GET',
+            params: {
+                username: '@username'
+            },
+            isArray: true
 		}
 	});
 });

@@ -7,19 +7,16 @@ app.config(['$stateProvider', '$urlRouterProvider', function($stateProvider, $ur
             templateUrl: 'public/partials/login.html',
             controller: 'LoginCtrl',
         })
-
         .state('register', {
             url: '/register',
             templateUrl: 'public/partials/register.html',
             controller: 'RegisterCtrl',
         })
-
         .state('view_properties', {
             url: '/view_properties',
             templateUrl: 'public/partials/view_properties.html',
             controller: 'ViewPropertiesCtrl'
         })
-
         .state('view_property_detail', {
             url: '/view_property_detail/{propertyId}',
             params : {
@@ -27,5 +24,10 @@ app.config(['$stateProvider', '$urlRouterProvider', function($stateProvider, $ur
             },
             templateUrl: 'public/partials/view_property_detail.html',
             controller: 'ViewPropertyDetailCtrl'
+        })
+        .state('view_visit_history', {
+            url: '/view_visit_history',
+            templateUrl: 'public/partials/view_visit_history.html',
+            controller: 'ViewVisitHistoryCtrl'
         });
 }]);
