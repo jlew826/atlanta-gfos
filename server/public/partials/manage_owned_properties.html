@@ -30,8 +30,10 @@
             <select ng-model="ca.selectedCropOrAnimalAdd" ng-options="x.name for x in farmItemOptions"></select>
             <button ng-click="toAdd.push(ca.selectedCropOrAnimalAdd.name)">Queue Crop/Animal for Addition to Property</button>
             <br>
-            <select ng-model="ca.selectedCropOrAnimalRemove" ng-options="x for x in obj.crops.split(',')"></select>
-            <button ng-click="toRemove.push(ca.selectedCropOrAnimalRemove)">Queue Crop/Animal for Removal from Property</button>
+            <select ng-model="ca.selectedCropOrAnimalRemove" ng-options="x for x in obj.farmOptions"></select>
+            <button ng-click="toRemove.push(ca.selectedCropOrAnimalRemove)">
+                Queue Crop/Animal for Removal from Property
+            </button>
             <p>Current crops: {{obj.crops}}</p>
             <p>Current animals: {{obj.animals}}</p>
 
@@ -41,6 +43,32 @@
             <button ng-click="clearQueues()">Undo</button>
             <br><br><br>
         </div>
+        <hr>
+
+        <div>
+            <p style="display: inline"> Request New Animal </p>
+            <input ng-model="newFarmItems.animal" placeholder="New Animal Name"></input>
+            <button ng-click="requestAnimal(newFarmItems.animal)">Submit Animal Request</button>
+
+            <p ng-show="newAnimalErrors" style="color:red">Error adding new animal.</p>
+            <p ng-show="newAnimalSuccess" style="color:blue">Successfully requested new animal.</p>
+
+        </div>
+        <hr>
+        <div>
+            <p style="display: inline"> Request New Crop </p>
+            <input ng-model="newFarmItems.crop" placeholder="New Crop Name"></input>
+            <div>
+                <p style="display: inline">Crop Type:</p>
+                <select style="display: inline" ng-model="newFarmItems.cropType"
+                ng-options="x for x in cropTypeOptions[obj.type]" style="display:inline"></select>
+            </div>
+            <button ng-click="requestCrop(newFarmItems.crop, newFarmItems.cropType)">Submit Crop Request</button>
+
+            <p ng-show="newCropErrors" style="color:red">Error adding new crop.</p>
+            <p ng-show="newCropSuccess" style="color:blue">Successfully requested new crop.</p>
+        </div>
+
         <hr>
 
 

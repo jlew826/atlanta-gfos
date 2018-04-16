@@ -1,15 +1,6 @@
-angular.module('app').controller('RegisterOwnerCtrl', function($scope, $http, $rootScope, RegisterOwnerFactory, FarmItemFactory) {
+angular.module('app').controller('OwnerAddPropertyCtrl', function($scope, $http, $rootScope, FarmItemFactory,
+    OwnerAddPropertyFactory) {
     $scope.obj = {};
-
-    $scope.animalOptions = null;
-    $scope.cropOptions = null;
-    $scope.isPublicOptions = [true, false];
-    $scope.isCommercialOptions = [true, false];
-
-    $scope.confirmErrors = false;
-    $scope.nullErrors = false;
-    $scope.otherErrors = null;
-    $scope.success = false;
 
     $scope.propertyOptions = ['Garden', 'Orchard', 'Farm'];
     $scope.cropTypeOptions = {
@@ -54,6 +45,16 @@ angular.module('app').controller('RegisterOwnerCtrl', function($scope, $http, $r
     }
     loadCrops();
 
+    $scope.animalOptions = null;
+    $scope.cropOptions = null;
+    $scope.isPublicOptions = [true, false];
+    $scope.isCommercialOptions = [true, false];
+
+    $scope.confirmErrors = false;
+    $scope.nullErrors = false;
+    $scope.otherErrors = null;
+    $scope.success = false;
+
     FarmItemFactory.animals.getAnimals({}, function(data) {
         $scope.animalOptions = data;
     });
@@ -62,39 +63,29 @@ angular.module('app').controller('RegisterOwnerCtrl', function($scope, $http, $r
         $scope.cropOptions = data;
     });
 
-    $scope.register = function() {
+    $scope.addProperty = function() {
         let valid = true;
         if ($scope.obj.selectedProperty === 'Farm') {
             valid = $scope.obj.selectedAnimal;
         }
 
-        if (valid && $scope.obj.username && $scope.obj.password && $scope.obj.email && $scope.obj.selectedProperty
+        if (valid && $scope.obj.selectedProperty && $scope.obj.selectedCrop
             && $scope.obj.selectedPublic && $scope.obj.selectedCommercial
                 && $scope.obj.streetAddress && $scope.obj.city && $scope.obj.zip && $scope.obj.size) {
-
-            if ($scope.password !== $scope.confirmPassword) {
-                $scope.confirmErrors = true;
-            } else {
                 $scope.confirmErrors = false;
                 $scope.nullErrors = false;
-                var res = RegisterOwnerFactory.registerOwner({
-                    owner: {
-                        username: $scope.obj.username,
-                        email: $scope.obj.email,
-                        password: $scope.obj.password
-                    },
-                    property: {
-                        name: $scope.obj.propertyName,
-                        is_commercial: $scope.obj.selectedCommercial,
-                        is_public: $scope.obj.selectedPublic,
-                        size: $scope.obj.size,
-                        st_address: $scope.obj.streetAddress,
-                        city: $scope.obj.city,
-                        zip: $scope.obj.zip,
-                        type: $scope.obj.selectedProperty,
-                        animal: $scope.obj.selectedAnimal ? $scope.obj.selectedAnimal.name : null,
-                        crop: $scope.obj.selectedCrop
-                    }
+                var res = OwnerAddPropertyFactory.addProperty({
+                    name: $scope.obj.propertyName,
+                    is_commercial: $scope.obj.selectedCommercial,
+                    is_public: $scope.obj.selectedPublic,
+                    size: $scope.obj.size,
+                    st_address: $scope.obj.streetAddress,
+                    city: $scope.obj.city,
+                    zip: $scope.obj.zip,
+                    type: $scope.obj.selectedProperty,
+                    animal: $scope.obj.selectedAnimal ? $scope.obj.selectedAnimal.name : null,
+                    crop: $scope.obj.selectedCrop,
+                    owner_id: $scope.currentUser.username
                 }, function() {
                     $scope.success = true;
                     $scope.otherErrors = null;
@@ -102,10 +93,8 @@ angular.module('app').controller('RegisterOwnerCtrl', function($scope, $http, $r
                     $scope.success = false;
                     $scope.otherErrors = err;
                 });
-            }
         } else {
             $scope.nullErrors = true;
         }
     }
-
 });

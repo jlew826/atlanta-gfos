@@ -44,5 +44,10 @@ app.config(['$stateProvider', '$urlRouterProvider', function($stateProvider, $ur
             url: '/manage_owned_properties/{propertyId}',
             templateUrl: 'public/partials/manage_owned_properties.html',
             controller: 'ManageOwnedPropertiesCtrl'
+        })
+        .state('owner_add_property', {
+            url: '/owner_add_property',
+            templateUrl: 'public/partials/owner_add_property.html',
+            controller: 'OwnerAddPropertyCtrl'
         });
 }]);

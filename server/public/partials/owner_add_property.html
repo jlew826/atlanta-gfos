@@ -1,12 +1,7 @@
-<a ui-sref="login">Login</a>
-
-<div ng-controller="RegisterOwnerCtrl">
-    <h3>New Owner Registration</h3>
+<div ng-controller="OwnerAddPropertyCtrl">
+    <button ui-sref="owned_properties">Back</button>
+    <h3>Add Property</h3>
     <div ng-if="cropOptions || animalOptions"> <!--only show when loaded-->
-        <input type="text" ng-model="obj.username" placeholder="username"></input>
-        <input type="text" ng-model="obj.email" placeholder="email"></input>
-        <input type="text" ng-model="obj.password" placeholder="password"></input>
-        <input type="text" ng-model="obj.confirmPassword" placeholder="Confirm Password"></input>
         <input type="text" ng-model="obj.propertyName" placeholder="Property Name"></input>
         <input type="text" ng-model="obj.streetAddress" placeholder="Street Address"></input>
         <input type="text" ng-model="obj.city" placeholder="City"></input>
@@ -38,7 +33,7 @@
             <select ng-model="obj.selectedCommercial" ng-options="x for x in isCommercialOptions" style="display:inline"></select>
         </div>
 
-        <button ng-click="register()" class="btn btn-primary">Register Owner</button>
+        <button ng-click="addProperty()" class="btn btn-primary">Add new property</button>
         <p ng-show="confirmErrors" style="color: red">Please ensure both passwords match.</p>
         <p ng-show="nullErrors" style="color: red">Please ensure all fields are filled out.</p>
         <p ng-show="success" style="color: blue">New owner successfully registered.</p>

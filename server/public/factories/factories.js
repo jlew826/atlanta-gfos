@@ -44,6 +44,7 @@ app.factory('RegisterOwnerFactory', function($resource) {
                     is_public: '@is_public',
                     st_address: '@st_address',
                     city: '@city',
+                    size: '@size',
                     zip: '@zip',
                     type: '@type',
                     animal: '@animal',
@@ -173,6 +174,50 @@ app.factory('ManagePropertyFactory', function($resource) {
                 city: '@city',
                 zip: '@zip',
                 property_id: '@property_id'
+            }
+		}
+	});
+});
+
+app.factory('RequestFarmItemFactory', function($resource) {
+    return {
+        animals: $resource('/api/animals', {}, {
+            requestAnimal: {
+    			method: 'POST',
+                params: {
+                    name: '@name',
+                    username: '@username'
+                }
+    		}
+    	}),
+        crops: $resource('/api/crops', {}, {
+    		requestCrop: {
+    			method: 'POST',
+                params: {
+                    name: '@name',
+                    type: '@type',
+                    username: '@username'
+                }
+    		}
+    	})
+    }
+});
+
+app.factory('OwnerAddPropertyFactory', function($resource) {
+    return $resource('/api/properties', {}, {
+        addProperty: {
+			method: 'POST',
+			params: {
+                name: '@name',
+                is_commercial: '@is_commercial',
+                is_public: '@is_public',
+                st_address: '@st_address',
+                city: '@city',
+                zip: '@zip',
+                type: '@type',
+                animal: '@animal',
+                crop: '@crop',
+                owner_id: '@owner_id'
             }
 		}
 	});

@@ -1,10 +1,15 @@
 angular.module('app').controller('ManageOwnedPropertiesCtrl', function($scope, $rootScope, OwnerSinglePropertyFactory,
-    ManagePropertyFactory, $state, $stateParams, FarmItemFactory) {
+    ManagePropertyFactory, RequestFarmItemFactory, $state, $stateParams, FarmItemFactory) {
     $scope.obj = {};
     $scope.ca = {};
 
+    $scope.newFarmItems = { cropType: null};
     $scope.animalOptions = null;
-    $scope.cropOptions = null;
+    $scope.cropTypeOptions = {
+        Garden: ['Vegetable', 'Flower'],
+        Orchard: ['Fruit', 'Nut']
+    };
+
     $scope.isPublicOptions = [true, false];
     $scope.isCommercialOptions = [true, false];
 
@@ -17,6 +22,7 @@ angular.module('app').controller('ManageOwnedPropertiesCtrl', function($scope, $
     $scope.toRemove = [];
 
     $scope.farmItemOptions = [];
+    $scope.farmOptions = [];
 
     function loadProperty() {
         var currentProperty = OwnerSinglePropertyFactory.getPropertyById({
@@ -24,15 +30,28 @@ angular.module('app').controller('ManageOwnedPropertiesCtrl', function($scope, $
         }, function(data) {
             data.is_public = data.is_public == true;
             data.is_commercial = data.is_commercial == true;
+
+            data.farmOptions = [];
+            if (data.animals && data.type === 'Farm') {
+                for (var animal of data.animals.split(',')) {
+                    data.farmOptions.push(animal);
+                }
+            }
+
+            if (data.crops) {
+                for (var crop of data.crops.split(',')) {
+                    data.farmOptions.push(crop);
+                }
+            }
+
             $scope.origProperty = JSON.parse(JSON.stringify(data));
             $scope.obj = JSON.parse(JSON.stringify(data));
-            console.log($scope.obj);
         })
     }
 
     loadProperty();
     FarmItemFactory.animals.getAnimals({}, function(data) {
-        if (data) {
+        if (data && $scope.obj.type === 'Farm') {
             $scope.animalOptions = data;
             for (var a of data) {
                 $scope.farmItemOptions.push(a);
@@ -42,13 +61,14 @@ angular.module('app').controller('ManageOwnedPropertiesCtrl', function($scope, $
 
     FarmItemFactory.crops.getCrops({}, function(data) {
         if (data) {
-            console.log(data);
             $scope.cropOptions = data;
             for (var c of data) {
                 $scope.farmItemOptions.push(c);
             }
         }
     });
+
+
 
     $scope.updateProperty = function() {
         if ($scope.obj.username && $scope.obj.email && $scope.obj.type
@@ -62,10 +82,16 @@ angular.module('app').controller('ManageOwnedPropertiesCtrl', function($scope, $
                 //If obj is dirty we know a change has occurred.
                 for (let i = 0; i < keys.length; i++) {
                     let key = keys[i];
-                    if ($scope.obj[key] !== $scope.origProperty[key]) {
+                    if ($scope.obj[key] !== $scope.origProperty[key] && key !== 'farmOptions') {
                         toChange[key] = $scope.obj[key];
                     }
                 }
+
+                if (toChange.farmOptions) {
+                    console.log(toChange.farmOptions);
+                    toChange.farmOptions = null;
+                }
+
 
                 if ($scope.toAdd.length > 0) {
                     console.log($scope.toAdd);
@@ -90,6 +116,43 @@ angular.module('app').controller('ManageOwnedPropertiesCtrl', function($scope, $
                 });
         } else {
             $scope.nullErrors = true;
+        }
+    }
+
+    $scope.requestAnimal = function(animalName) {
+        if (animalName) {
+            var res = RequestFarmItemFactory.animals.requestAnimal({
+                username: $rootScope.currentUser.username,
+                name: animalName
+            }, function(data) {
+                $scope.newAnimalSuccess = true;
+                $scope.newAnimalErrors = false;
+            });
+        } else {
+            $scope.newAnimalErrors = true;
+            $scope.newAnimalSuccess = false;
+
+        }
+    }
+
+    $scope.requestCrop = function(cropName, cropType) {
+        console.log(cropName);
+        console.log(cropType);
+        console.log($rootScope.currentUser.username);
+        if (cropType && cropName) {
+            var res = RequestFarmItemFactory.crops.requestCrop({
+                username: $rootScope.currentUser.username,
+                name: cropName,
+                type: cropType
+            }, function(data) {
+                console.log(data);
+                $scope.newCropSuccess = true;
+                $scope.newCropErrors = false;
+            });
+        } else {
+            $scope.newCropErrors = true;
+            $scope.newCropSuccess = false;
+
         }
     }
 
