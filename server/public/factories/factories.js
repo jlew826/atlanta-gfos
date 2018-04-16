@@ -15,7 +15,7 @@ app.factory('LoginFactory', function($resource) {
 	});
 });
 
-app.factory('RegisterFactory', function($resource) {
+app.factory('RegisterVisitorFactory', function($resource) {
     return $resource('/api/visitors', {}, {
 		registerVisitor: {
 			method: 'POST',
@@ -26,14 +26,29 @@ app.factory('RegisterFactory', function($resource) {
             }
 		}
 	});
+});
 
+app.factory('RegisterOwnerFactory', function($resource) {
     return $resource('/api/owners', {}, {
-		registerOwner: {
+        registerOwner: {
 			method: 'POST',
 			params: {
-                username: '@username',
-                email: '@email',
-                password: '@password'
+                owner: {
+                    username: '@username',
+                    email: '@email',
+                    password: '@password'
+                },
+                property: {
+                    name: '@name',
+                    is_commercial: '@is_commercial',
+                    is_public: '@is_public',
+                    st_address: '@st_address',
+                    city: '@city',
+                    zip: '@zip',
+                    type: '@type',
+                    animal: '@animal',
+                    crop: '@crop'
+                }
             }
 		}
 	});
@@ -41,13 +56,6 @@ app.factory('RegisterFactory', function($resource) {
 
 app.factory('PropertyFactory', function($resource) {
     //View confirmed properties
-    return $resource('/api/properties/confirmed', {}, {
-		getConfirmedProperties: {
-			method: 'GET',
-            isArray: true
-		}
-	});
-
     return $resource('/api/properties/confirmed', {}, {
 		getConfirmedProperties: {
 			method: 'GET',
@@ -101,7 +109,6 @@ app.factory('VisitLoggerFactory', function($resource) {
 	});
 });
 
-
 app.factory('VisitHistoryFactory', function($resource) {
     //get visitor view of specific property
     return $resource('/api/visitors/:username/visits', {}, {
@@ -111,6 +118,62 @@ app.factory('VisitHistoryFactory', function($resource) {
                 username: '@username'
             },
             isArray: true
+		}
+	});
+});
+
+app.factory('FarmItemFactory', function($resource) {
+    return {
+        animals: $resource('/api/animals', {}, {
+            getAnimals: {
+    			method: 'GET',
+                isArray: true
+    		}
+    	}),
+        crops: $resource('/api/crops', {}, {
+    		getCrops: {
+    			method: 'GET',
+                isArray: true
+    		}
+    	})
+    }
+});
+
+app.factory('OwnedPropertyFactory', function($resource) {
+    return $resource('/api/owners/:owner_id/own_properties', {}, {
+		getProperties: {
+			method: 'GET',
+            isArray: true
+		}
+	});
+});
+
+app.factory('OwnerSinglePropertyFactory', function($resource) {
+    //get specific property
+    return $resource('/api/properties/:property_id/', {}, {
+		getPropertyById: {
+			method: 'GET'
+		}
+	});
+});
+
+app.factory('ManagePropertyFactory', function($resource) {
+    return $resource('/api/properties/:property_id', {}, {
+        updateProperty: {
+			method: 'PUT',
+			params: {
+                add_farm_items: '@add_farm_items',
+                username: '@username',
+                remove_farm_items: '@remove_farm_items',
+                size: '@size',
+                is_public: '@is_public',
+                is_commercial: '@is_commercial',
+                name: '@name',
+                st_address: '@st_address',
+                city: '@city',
+                zip: '@zip',
+                property_id: '@property_id'
+            }
 		}
 	});
 });

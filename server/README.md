@@ -214,7 +214,7 @@ Send a `GET` request to any of the following paths to get the relevant types of 
 - `/api/crops/garden` - get all vegetables and flowers
 - `/api/crops/fruits` - get all fruits
 - `/api/crops/nuts` - get all nuts
-- `/api/crops/vetetables` - get all vegetables
+- `/api/crops/vegetables` - get all vegetables
 - `/api/crops/flowers` - get all flowers  
 Optionally, you can include a filter for status.  
 Request:

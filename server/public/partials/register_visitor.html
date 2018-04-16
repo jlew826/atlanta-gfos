@@ -1,0 +1,14 @@
+<a ui-sref="login">Login</a>
+
+<div ng-controller="RegisterVisitorCtrl">
+    <h3>Register Visitor</h3>
+
+    <input type="text" ng-model="username" placeholder="username"></input>
+    <input type="text" ng-model="email" placeholder="email"></input>
+    <input type="text" ng-model="password" placeholder="password"></input>
+    <input type="text" ng-model="confirmPassword" placeholder="Confirm Password"></input>
+    <button ng-click="register()">Register Visitor</button>
+    <p ng-show="confirmErrors" style="color: red">Please ensure both passwords match.</p>
+    <p ng-show="success" style="color: blue">New visitor successfully registered.</p>
+
+</div>

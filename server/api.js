@@ -290,6 +290,7 @@ api.get('/api/farm_items', function(req, res) {
 */
 api.get('/api/animals', function(req, res) {
     sql = `SELECT name, CAST(status AS UNSIGNED) AS status, type FROM FARM_ITEM WHERE type = 'Animal'`;
+    let inserts = [];
     if(typeof req.query['confirmed'] !== 'undefined') {
         sql += ' AND status = ?';
         inserts.push(req.query['confirmed'] == 'true' ? 1 : 0);
@@ -306,6 +307,7 @@ api.get('/api/animals', function(req, res) {
 */
 api.get('/api/crops', function(req, res) {
     sql = `SELECT name, CAST(status AS UNSIGNED) AS status, type FROM FARM_ITEM WHERE type = 'Fruit' OR type = 'Nut' OR type = 'Vegetable' OR type = 'Flower'`;
+    let inserts = [];
     if(typeof req.query['confirmed'] !== 'undefined') {
         sql += ' AND status = ?';
         inserts.push(req.query['confirmed'] == 'true' ? 1 : 0);

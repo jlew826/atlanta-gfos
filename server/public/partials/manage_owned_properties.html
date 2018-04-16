@@ -1,0 +1,53 @@
+<div style="padding-left:20px;">
+    <button ui-sref="owned_properties">Back</button>
+
+    <h3>Manage {{origProperty.name}}</h3>
+    <div ng-if="farmItemOptions.length > 0"> <!--only show when loaded-->
+        <p style="display:inline">Name:</p><input type="text" ng-model="obj.name" placeholder="Property Name" style="display:inline"></input>
+        <p style="display:inline">Address:</p><input type="text" ng-model="obj.st_address" placeholder="Street Address"></input>
+        <p style="display:inline">City:</p><input type="text" ng-model="obj.city" placeholder="City"></input>
+        <br>
+        <p style="display:inline">Zip:</p><input type="text" ng-model="obj.zip" placeholder="Zip"></input>
+        <p style="display:inline">Size (acres):</p><input type="text" ng-model="obj.size" placeholder="Acres"></input>
+
+        <div>
+            <p style="display:inline">Public:</p>
+            <select ng-model="obj.is_public" ng-options="x for x in isPublicOptions" style="display:inline"></select>
+        </div>
+
+        <div>
+            <p style="display:inline">Commercial:</p>
+            <select ng-model="obj.is_commercial" ng-options="x for x in isCommercialOptions" style="display:inline"></select>
+        </div>
+
+
+        <div>
+            <p style="display:inline">Property Type: {{obj.type}}</p>
+            <p>ID: {{obj.property_id}}</p>
+        </div>
+        <hr>
+        <div>
+            <select ng-model="ca.selectedCropOrAnimalAdd" ng-options="x.name for x in farmItemOptions"></select>
+            <button ng-click="toAdd.push(ca.selectedCropOrAnimalAdd.name)">Queue Crop/Animal for Addition to Property</button>
+            <br>
+            <select ng-model="ca.selectedCropOrAnimalRemove" ng-options="x for x in obj.crops.split(',')"></select>
+            <button ng-click="toRemove.push(ca.selectedCropOrAnimalRemove)">Queue Crop/Animal for Removal from Property</button>
+            <p>Current crops: {{obj.crops}}</p>
+            <p>Current animals: {{obj.animals}}</p>
+
+            <p ng-show="toAdd.length > 0">Crops and animals to be added on save: {{toAdd}}</p>
+            <p ng-show="toRemove.length > 0">Crops and animals to be removed on save: {{toRemove}}</p>
+
+            <button ng-click="clearQueues()">Undo</button>
+            <br><br><br>
+        </div>
+        <hr>
+
+
+        <button ng-click="updateProperty()" class="btn btn-primary">Save Changes</button>
+        <p ng-show="nullErrors" style="color: red">Please ensure all fields are filled out.</p>
+        <p ng-show="success" style="color: blue">Property successfully updated.</p>
+        <p ng-show="otherErrors != null" style="color:red" ng-bind-html="otherErrors.data">
+        </p>
+    </div>
+</div>

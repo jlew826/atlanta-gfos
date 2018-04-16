@@ -1,4 +1,4 @@
-var app = angular.module('app', ['ui.router', 'ngResource']);
+var app = angular.module('app', ['ui.router', 'ngSanitize', 'ngResource']);
 app.config(['$stateProvider', '$urlRouterProvider', function($stateProvider, $urlRouterProvider) {
     $urlRouterProvider.otherwise('/');
     $stateProvider
@@ -7,10 +7,15 @@ app.config(['$stateProvider', '$urlRouterProvider', function($stateProvider, $ur
             templateUrl: 'public/partials/login.html',
             controller: 'LoginCtrl',
         })
-        .state('register', {
-            url: '/register',
-            templateUrl: 'public/partials/register.html',
-            controller: 'RegisterCtrl',
+        .state('register_visitor', {
+            url: '/register_visitor',
+            templateUrl: 'public/partials/register_visitor.html',
+            controller: 'RegisterVisitorCtrl',
+        })
+        .state('register_owner', {
+            url: '/register_owner',
+            templateUrl: 'public/partials/register_owner.html',
+            controller: 'RegisterOwnerCtrl',
         })
         .state('view_properties', {
             url: '/view_properties',
@@ -29,5 +34,15 @@ app.config(['$stateProvider', '$urlRouterProvider', function($stateProvider, $ur
             url: '/view_visit_history',
             templateUrl: 'public/partials/view_visit_history.html',
             controller: 'ViewVisitHistoryCtrl'
+        })
+        .state('owned_properties', {
+            url: '/owned_properties',
+            templateUrl: 'public/partials/owned_properties.html',
+            controller: 'OwnedPropertiesCtrl'
+        })
+        .state('manage_owned_properties', {
+            url: '/manage_owned_properties/{propertyId}',
+            templateUrl: 'public/partials/manage_owned_properties.html',
+            controller: 'ManageOwnedPropertiesCtrl'
         });
 }]);

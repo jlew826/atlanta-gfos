@@ -1,0 +1,39 @@
+<div ng-controller="OwnedPropertiesCtrl" style="padding-left: 5px">
+    <h3>Your Properties</h3>
+    <button ng-click="logOut()" style="display:inline">Log Out</button>
+
+    <input type="text" ng-model="query" placeholder="Filter by any attribute... "
+        style="font-size: 20px; height:75px; width: 400px; margin:0px auto; display:block; margin-bottom: 20px !important">
+    <table class="table table-hover">
+        <tr>
+            <th>Name</th>
+            <th>Address</th>
+            <th>City</th>
+            <th>Zip</th>
+            <th>Size</th>
+            <th>Type</th>
+            <th>Public</th>
+            <th>Commercial</th>
+            <th>ID</th>
+            <th>Visits</th>
+            <th>Average Rating</th>
+        </tr>
+        <!--<tr ng-repeat="property in confirmedProperties | filter: { is_public: 1, is_commercial: 1 }">-->
+        <tr ng-repeat="property in ownedProperties | filter: search | filter:  { is_public: 1, is_commercial: 1 }"
+            ng-click="manageProperty(property.property_id)"
+            ng-cloak>
+            <td>{{property.name}}</td>
+            <td>{{property.st_address}}</td>
+            <td>{{property.city}}</td>
+            <td>{{property.zip}}</td>
+            <td>{{property.size}}</td>
+            <td>{{property.type}}</td>
+            <td>{{property.is_public}}</td>
+            <td>{{property.is_commercial}}</td>
+            <td>{{property.property_id}}</td>
+            <td>{{property.num_visits}}</td>
+            <td>{{property.avg_rating || 'No ratings'}}</td>
+        </tr>
+    </table>
+
+</div>

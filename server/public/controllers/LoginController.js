@@ -3,7 +3,6 @@ angular.module('app').controller('LoginCtrl', function($scope, $rootScope, $stat
     $scope.username = '';
     $scope.password = '';
     $scope.loginErrors = false;
-    $rootScope.currentUser = null;
 
     $scope.login = function() {
         if ($scope.username !== null && $scope.password !== null) {
@@ -14,6 +13,8 @@ angular.module('app').controller('LoginCtrl', function($scope, $rootScope, $stat
 
                     if (user.account_type === 'Visitor') {
                         $state.go('view_properties');
+                    } else if (user.account_type === 'Owner') {
+                        $state.go('owned_properties');
                     }
                 }
             }, function() {

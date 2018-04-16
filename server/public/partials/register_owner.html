@@ -1,0 +1,47 @@
+<a ui-sref="login">Login</a>
+
+<div ng-controller="RegisterOwnerCtrl">
+    <h3>New Owner Registration</h3>
+    <div ng-if="cropOptions || animalOptions"> <!--only show when loaded-->
+        <input type="text" ng-model="obj.username" placeholder="username"></input>
+        <input type="text" ng-model="obj.email" placeholder="email"></input>
+        <input type="text" ng-model="obj.password" placeholder="password"></input>
+        <input type="text" ng-model="obj.confirmPassword" placeholder="Confirm Password"></input>
+        <input type="text" ng-model="obj.propertyName" placeholder="Property Name"></input>
+        <input type="text" ng-model="obj.streetAddress" placeholder="Street Address"></input>
+        <input type="text" ng-model="obj.city" placeholder="City"></input>
+        <input type="text" ng-model="obj.zip" placeholder="Zip"></input>
+        <input type="text" ng-model="obj.size" placeholder="Acres"></input>
+
+        <div>
+            <p style="display:inline">Property Type:</p>
+            <select ng-model="obj.selectedProperty" ng-options="x for x in propertyOptions" style="display:inline"></select>
+        </div>
+
+        <div ng-click="console.log(animalOptions)">
+            <p style="display:inline">Animal:</p>
+            <select ng-model="obj.selectedAnimal" ng-options="x.name for x in animalOptions" style="display:inline"></select>
+        </div>
+
+        <div>
+            <p style="display:inline">Crop:</p>
+            <select ng-model="obj.selectedCrop" ng-options="x.name for x in cropOptions" style="display:inline"></select>
+        </div>
+
+        <div>
+            <p style="display:inline">Public:</p>
+            <select ng-model="obj.selectedPublic" ng-options="x for x in isPublicOptions" style="display:inline"></select>
+        </div>
+
+        <div>
+            <p style="display:inline">Commercial:</p>
+            <select ng-model="obj.selectedCommercial" ng-options="x for x in isCommercialOptions" style="display:inline"></select>
+        </div>
+
+        <button ng-click="register()" class="btn btn-primary">Register Owner</button>
+        <p ng-show="confirmErrors" style="color: red">Please ensure both passwords match.</p>
+        <p ng-show="nullErrors" style="color: red">Please ensure all fields are filled out.</p>
+        <p ng-show="success" style="color: blue">New owner successfully registered.</p>
+        <p ng-show="otherErrors != null" style="color:red">{{otherErrors.data}}</p>
+    </div>
+</div>

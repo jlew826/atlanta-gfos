@@ -18,10 +18,8 @@ angular.module('app').controller('ViewPropertiesCtrl', function($scope, $rootSco
                 visitor_id: $rootScope.currentUser.username,
                 property_id:  cp.property_id
             }, function(data) {
-                console.log(data);
                 cp.num_visits = property.num_visits;
                 $scope.property = data;
-                console.log(data);
             });
         }
         $scope.confirmedProperties = confirmedProperties;
