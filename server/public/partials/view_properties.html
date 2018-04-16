@@ -19,7 +19,7 @@
             <th>Average Rating</th>
         </tr>
         <!--<tr ng-repeat="cf in confirmedProperties | filter: { is_public: 1, is_commercial: 1 }">-->
-        <tr ng-repeat="cf in confirmedProperties | filter: search | filter:  { is_public: 1, is_commercial: 1 }"
+        <tr ng-repeat="cf in publicConfirmedProperties | filter: search | filter:  { is_public: 1 }"
             ng-click="viewPropertyDetail(cf.property_id)"
             ng-cloak>
             <td>{{cf.name}}</td>
@@ -27,11 +27,11 @@
             <td>{{cf.city}}</td>
             <td>{{cf.zip}}</td>
             <td>{{cf.type}}</td>
-            <td>{{cf.is_public}}</td>
-            <td>{{cf.is_commercial}}</td>
+            <td>{{cf.is_public ? "True" : "False"}}</td>
+            <td>{{cf.is_commercial ? "True" : "False"}}</td>
             <td>{{cf.property_id}}</td>
             <td>{{cf.num_visits}}</td>
-            <td>{{cf.avg_rating}}</td>
+            <td>{{cf.avg_rating ? cf.avg_rating : "N/A"}}</td>
         </tr>
     </table>
 

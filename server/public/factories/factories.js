@@ -56,8 +56,8 @@ app.factory('RegisterOwnerFactory', function($resource) {
 });
 
 app.factory('PropertyFactory', function($resource) {
-    //View confirmed properties
-    return $resource('/api/properties/confirmed', {}, {
+    //View public, confirmed properties
+    return $resource('/api/visitors/properties', {}, {
 		getConfirmedProperties: {
 			method: 'GET',
             isArray: true

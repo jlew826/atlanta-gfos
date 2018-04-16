@@ -10,19 +10,10 @@ angular.module('app').controller('ViewPropertiesCtrl', function($scope, $rootSco
         }
         return false;
     };
-    $scope.confirmedProperties = null;
-    var confirmedPropertiesRes = PropertyFactory.getConfirmedProperties({}, function(confirmedProperties) {
-        //make separate visitor view queries to get the number of visits since they aren't available in the initial query
-        for (var cp of confirmedProperties) {
-            var property = PropertyDetailFactory.getVisitorViewOfProperty({
-                visitor_id: $rootScope.currentUser.username,
-                property_id:  cp.property_id
-            }, function(data) {
-                cp.num_visits = property.num_visits;
-                $scope.property = data;
-            });
-        }
-        $scope.confirmedProperties = confirmedProperties;
+    $scope.publicConfirmedProperties = null;
+    var publicConfirmedPropertiesRes = PropertyFactory.getConfirmedProperties({}, function(publicConfirmedProperties) {
+        console.log("hello");
+        $scope.publicConfirmedProperties = publicConfirmedProperties;
     });
 
     $scope.viewPropertyDetail = function(id) {
