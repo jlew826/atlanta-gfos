@@ -68,9 +68,10 @@ angular.module('app').controller('OwnerAddPropertyCtrl', function($scope, $http,
         if ($scope.obj.selectedProperty === 'Farm') {
             valid = $scope.obj.selectedAnimal;
         }
+        console.log(valid);
 
         if (valid && $scope.obj.selectedProperty && $scope.obj.selectedCrop
-            && $scope.obj.selectedPublic && $scope.obj.selectedCommercial
+            && $scope.obj.selectedPublic != null && $scope.obj.selectedCommercial != null
                 && $scope.obj.streetAddress && $scope.obj.city && $scope.obj.zip && $scope.obj.size) {
                 $scope.confirmErrors = false;
                 $scope.nullErrors = false;
