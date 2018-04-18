@@ -1,6 +1,8 @@
 <div style="padding-left:20px;">
     <h1><u>{{property.name}} Details</u></h1>
     <p><b>Name: </b>{{property.name}}</p>
+    <p><b>Owner: </b>{{property.username}}</p>
+    <p><b>Owner email: </b>{{property.email}}</p>
     <p><b>Address: </b>{{property.st_address}}</p>
     <p><b>City: </b>{{property.city}}</p>
     <p><b>Zip: </b>{{property.zip}}</p>
@@ -24,5 +26,5 @@
         </p>
     </div>
 
-    <button ui-sref="view_properties">Back</button>
+    <button ng-click="back()">Back</button>
 </div>

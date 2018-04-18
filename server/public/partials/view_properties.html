@@ -3,23 +3,69 @@
     <button ui-sref="view_visit_history" style="display:inline">View Visit History</button>
     <button ng-click="logOut()" style="display:inline">Log Out</button>
 
+    <hr>
+
+    <input ng-model="filterName" placeholder="Filter by name." style="display:inline"></input>
+    <input ng-model="filterCity" placeholder="Filter by city." style="display:inline"></input>
+    <input ng-model="filterType" placeholder="Filter by type." style="display:inline"></input>
+    <input ng-model="filterNumVisits" placeholder="Filter by num_visits." style="display:inline"></input>
+
+    <hr>
+        <p>Filter by num visits:</p>
+
+        <p style="display:inline">Min num_visits:</p>
+        <input ng-model="minNumVisits" ng-init="minNumVisits=0" placeholder="Min Avg Rating." style="display:inline"></input>
+
+        <p style="display:inline">Max num_visits:</p>
+        <input ng-model="maxNumVisits" ng-init="maxNumVisits=5" placeholder="Max Avg Rating." style="display:inline"></input>
+    <hr>
+    <hr>
+        <p>Filter by average rating:</p>
+
+        <p style="display:inline">Min average rating:</p>
+        <input ng-model="minAvgRating" ng-init="minAvgRating=0" placeholder="Min Avg Rating." style="display:inline"></input>
+
+        <p style="display:inline">Max average rating:</p>
+        <input ng-model="maxAvgRating" ng-init="maxAvgRating=5" placeholder="Max Avg Rating." style="display:inline"></input>
+    <hr>
+
+    <!-- General filter
     <input type="text" ng-model="query" placeholder="Filter by any attribute... "
-        style="font-size: 20px; height:75px; width: 400px; margin:0px auto; display:block; margin-bottom: 20px !important">
+        style="font-size: 20px; height:75px; width: 400px; margin:0px auto; display:block; margin-bottom: 20px !important"> -->
     <table class="table table-hover">
         <tr>
-            <th>Name</th>
+            <th ng-click="changeOrder('name')"
+            ng-class="order === 'name' ? 'sorting-by' : 'sorting-by-disabled'">
+                Name
+            </th>
             <th>Address</th>
-            <th>City</th>
+            <th ng-click="changeOrder('city')"
+            ng-class="order === 'city' ? 'sorting-by' : 'sorting-by-disabled'">
+                City
+            </th>
             <th>Zip</th>
-            <th>Type</th>
+            <th ng-click="changeOrder('type')"
+            ng-class="order === 'type' ? 'sorting-by' : 'sorting-by-disabled'">
+                Type
+            </th>
             <th>Public</th>
             <th>Commercial</th>
             <th>ID</th>
-            <th>Visits</th>
-            <th>Average Rating</th>
+            <th ng-click="changeOrder('num_visits')"
+            ng-class="order === 'num_visits' ? 'sorting-by' : 'sorting-by-disabled'">
+                Visits
+            </th>
+            <th ng-click="changeOrder('avg_rating')"
+                ng-class="order === 'avg_rating' ? 'sorting-by' : 'sorting-by-disabled'">
+                Average Rating
+            </th>
         </tr>
         <!--<tr ng-repeat="cf in confirmedProperties | filter: { is_public: 1, is_commercial: 1 }">-->
-        <tr ng-repeat="cf in publicConfirmedProperties | filter: search | filter:  { is_public: 1 }"
+        <tr ng-repeat="cf in publicConfirmedProperties | orderBy:order:asc |
+            filter: avgRatingFilter | filter: numVisitsFilter |
+            filter: { name: filterName } | filter: { city: filterCity } |
+            filter: { type: filterType } | filter: { num_visits: filterNumVisits } |
+            filter: { avg_rating: filterAvgRating } | filter:  { is_public: 1 }"
             ng-click="viewPropertyDetail(cf.property_id)"
             ng-cloak>
             <td>{{cf.name}}</td>
@@ -31,7 +77,7 @@
             <td>{{cf.is_commercial ? "True" : "False"}}</td>
             <td>{{cf.property_id}}</td>
             <td>{{cf.num_visits}}</td>
-            <td>{{cf.avg_rating ? cf.avg_rating : "N/A"}}</td>
+            <td>{{cf.avg_rating || "N/A"}}</td>
         </tr>
     </table>
 

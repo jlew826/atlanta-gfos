@@ -60,7 +60,10 @@ app.factory('PropertyFactory', function($resource) {
     return $resource('/api/visitors/properties', {}, {
 		getConfirmedProperties: {
 			method: 'GET',
-            isArray: true
+            isArray: true,
+            params: {
+                filter: '@filter'
+            }
 		}
 	});
 
@@ -142,6 +145,15 @@ app.factory('FarmItemFactory', function($resource) {
 
 app.factory('OwnedPropertyFactory', function($resource) {
     return $resource('/api/owners/:owner_id/own_properties', {}, {
+		getProperties: {
+			method: 'GET',
+            isArray: true
+		}
+	});
+});
+
+app.factory('OtherOwnerPropertiesFactory', function($resource) {
+    return $resource('/api/owners/:owner_id/other_properties', {}, {
 		getProperties: {
 			method: 'GET',
             isArray: true

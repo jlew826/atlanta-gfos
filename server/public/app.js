@@ -24,8 +24,8 @@ app.config(['$stateProvider', '$urlRouterProvider', function($stateProvider, $ur
         })
         .state('view_property_detail', {
             url: '/view_property_detail/{propertyId}',
-            params : {
-                obj : null
+            params: {
+                referrer: null
             },
             templateUrl: 'public/partials/view_property_detail.html',
             controller: 'ViewPropertyDetailCtrl'
@@ -49,5 +49,10 @@ app.config(['$stateProvider', '$urlRouterProvider', function($stateProvider, $ur
             url: '/owner_add_property',
             templateUrl: 'public/partials/owner_add_property.html',
             controller: 'OwnerAddPropertyCtrl'
+        })
+        .state('other_owner_properties', {
+            url: '/other_owner_properties',
+            templateUrl: 'public/partials/other_owner_properties.html',
+            controller: 'OtherOwnerPropertiesCtrl'
         });
 }]);

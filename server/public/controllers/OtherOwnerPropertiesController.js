@@ -1,4 +1,5 @@
-angular.module('app').controller('ViewPropertiesCtrl', function($scope, $rootScope, $state, PropertyFactory, PropertyDetailFactory) {
+angular.module('app').controller('OtherOwnerPropertiesCtrl', function($scope, $rootScope, $state, $stateParams, OtherOwnerPropertiesFactory) {
+    $scope.otherProperties = null;
     $scope.query = '';
     $scope.order = 'name';
     $scope.asc = false;
@@ -7,6 +8,11 @@ angular.module('app').controller('ViewPropertiesCtrl', function($scope, $rootSco
     $scope.filterOptions = ['name', 'city', 'type', 'num_visits', 'avg_rating'];
     $scope.selectedFilter = 'name';
     $scope.filterQuery = '';
+
+    $rootScope.currentUser = $rootScope.currentUser ? $rootScope.currentUser : {
+        username: "robert123",
+        email: "robert123@gmail.com",
+    };
 
     $scope.search = function(property) {
         var query = $scope.query.toLowerCase(),
@@ -36,16 +42,28 @@ angular.module('app').controller('ViewPropertiesCtrl', function($scope, $rootSco
         }
     }
 
+    $scope.query = '';
+    $scope.search = function(property) {
+        var query = $scope.query.toLowerCase(),
+        fullname = property.name.toLowerCase() + ' ' + property.st_address.toLowerCase() + ' '
+            + property.city.toLowerCase() + ' ' + property.zip + ' ' + property.type.toLowerCase() + ' ' + property.property_id.toString().toLowerCase();
 
-    $scope.publicConfirmedProperties = null;
-    var publicConfirmedPropertiesRes = PropertyFactory.getConfirmedProperties({}, function(publicConfirmedProperties) {
-        for (let cf of publicConfirmedProperties) {
-            cf.avg_rating = cf.avg_rating ? cf.avg_rating : 0;
+        if (fullname.indexOf(query) != -1) {
+            return true;
         }
-        $scope.publicConfirmedProperties = publicConfirmedProperties;
+        return false;
+    };
+
+    OtherOwnerPropertiesFactory.getProperties({
+        owner_id: $rootScope.currentUser.username
+    }, function (data) {
+        for (let p of data) {
+            p.avg_rating = p.avg_rating ? p.avg_rating : 0;
+        }
+        $scope.otherProperties = data;
     });
 
-    $scope.viewPropertyDetail = function(id) {
+    $scope.viewPropertyDetails = function(id) {
         $state.go('view_property_detail', { propertyId: id, referrer: $state.current.name });
     }
 

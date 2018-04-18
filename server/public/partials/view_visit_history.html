@@ -10,9 +10,8 @@
         <!--<tr ng-repeat="cf in confirmedProperties | filter: { is_public: 1, is_commercial: 1 }">-->
         <tr ng-repeat="vh in visitHistory" ng-click="viewPropertyDetailFromHistory(vh.name)" ng-cloak>
             <td>{{vh.name}}</td>
-            <td>{{vh.date_added}}</td>
+            <td>{{vh.date_added | date:'MM/dd/yyyy'}}</td>
             <td>{{vh.score}}</td>
         </tr>
     </table>
-
 </div>

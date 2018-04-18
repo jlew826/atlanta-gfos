@@ -53,4 +53,9 @@ angular.module('app').controller('ViewPropertyDetailCtrl', function($scope, $roo
             });
         }
     }
+
+    $scope.back = function() {
+        console.log($stateParams);
+        $state.go($stateParams.referrer);
+    }
 });

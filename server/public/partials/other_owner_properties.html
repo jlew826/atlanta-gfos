@@ -1,12 +1,7 @@
-<div ng-controller="OwnedPropertiesCtrl" style="padding-left: 5px">
-    <h3>Your Properties</h3>
+<div ng-controller="OtherOwnerPropertiesCtrl" style="padding-left: 5px">
+    <h3>All Other Valid Properties</h3>
     <button ng-click="logOut()" style="display:inline">Log Out</button>
-    <button ui-sref="other_owner_properties" style="display:inline">View Other Properties</button>
     <button ui-sref="owner_add_property" style="display:inline">Add New Property</button>
-
-    <!--<input type="text" ng-model="query" placeholder="Filter by any attribute... "
-        style="font-size: 20px; height:75px; width: 400px; margin:0px auto; display:block; margin-bottom: 20px !important">-->
-
 
         <hr>
 
@@ -34,10 +29,6 @@
             <input ng-model="maxAvgRating" ng-init="maxAvgRating=5" placeholder="Max Avg Rating." style="display:inline"></input>
         <hr>
 
-        <!-- General filter
-        <input type="text" ng-model="query" placeholder="Filter by any attribute... "
-            style="font-size: 20px; height:75px; width: 400px; margin:0px auto; display:block; margin-bottom: 20px !important"> -->
-
     <table class="table table-hover">
         <tr>
             <th ng-click="changeOrder('name')"
@@ -51,15 +42,15 @@
             </th>
             <th>Zip</th>
             <th>Size</th>
-            <th ng-click="changeOrder('type')"
-            ng-class="order === 'type' ? 'sorting-by' : 'sorting-by-disabled'">
-                Type
+            <th>Type</th>
+            <th ng-click="changeOrder('is_public')"
+                ng-class="order === 'num_visits' ? 'sorting-by' : 'sorting-by-disabled'">
+                Public
             </th>
-            <th>Public</th>
             <th>Commercial</th>
             <th>ID</th>
             <th ng-click="changeOrder('num_visits')"
-            ng-class="order === 'num_visits' ? 'sorting-by' : 'sorting-by-disabled'">
+                ng-class="order === 'num_visits' ? 'sorting-by' : 'sorting-by-disabled'">
                 Visits
             </th>
             <th ng-click="changeOrder('avg_rating')"
@@ -67,13 +58,13 @@
                 Average Rating
             </th>
         </tr>
-        <!--<tr ng-repeat="property in confirmedProperties | filter: { is_public: 1, is_commercial: 1 }">-->
-        <tr ng-repeat="property in ownedProperties | orderBy:order:asc |
+        
+        <tr ng-repeat="property in otherProperties | orderBy:order:asc |
             filter: avgRatingFilter | filter: numVisitsFilter |
             filter: { name: filterName } | filter: { city: filterCity } |
-            filter: { type: filterType } | filter: { num_visits: filterNumVisits } |
+            filter: { type: filterPublic } | filter: { num_visits: filterNumVisits } |
             filter: { avg_rating: filterAvgRating }"
-            ng-click="manageProperty(property.property_id)"
+            ng-click="viewPropertyDetails(property.property_id)"
             ng-cloak>
             <td>{{property.name}}</td>
             <td>{{property.st_address}}</td>
