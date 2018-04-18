@@ -1,5 +1,6 @@
 <div ng-controller="OtherOwnerPropertiesCtrl" style="padding-left: 5px">
     <h3>All Other Valid Properties</h3>
+    <button ui-sref="owned_properties" style="display:inline">Home</button>
     <button ng-click="logOut()" style="display:inline">Log Out</button>
     <button ui-sref="owner_add_property" style="display:inline">Add New Property</button>
 
@@ -58,7 +59,7 @@
                 Average Rating
             </th>
         </tr>
-        
+
         <tr ng-repeat="property in otherProperties | orderBy:order:asc |
             filter: avgRatingFilter | filter: numVisitsFilter |
             filter: { name: filterName } | filter: { city: filterCity } |

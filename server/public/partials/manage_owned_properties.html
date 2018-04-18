@@ -1,6 +1,7 @@
 <div style="padding-left:20px;">
     <button ui-sref="owned_properties">Back</button>
 
+
     <h3>Manage {{origProperty.name}}</h3>
     <div ng-if="farmItemOptions.length > 0"> <!--only show when loaded-->
         <p style="display:inline">Name:</p><input type="text" ng-model="obj.name" placeholder="Property Name" style="display:inline"></input>
@@ -27,20 +28,22 @@
         </div>
         <hr>
         <div>
-            <select ng-model="ca.selectedCropOrAnimalAdd" ng-options="x.name for x in farmItemOptions"></select>
-            <button ng-click="toAdd.push(ca.selectedCropOrAnimalAdd.name)">Queue Crop/Animal for Addition to Property</button>
+            <select ng-model="ca.selectedCropOrAnimalAdd" ng-options="x for x in availableCrops | orderBy:x"></select>
+            <button ng-click="toAdd.push(ca.selectedCropOrAnimalAdd)">Queue Crop/Animal for Addition to Property</button>
             <br>
-            <select ng-model="ca.selectedCropOrAnimalRemove" ng-options="x for x in obj.farmOptions"></select>
-            <button ng-click="toRemove.push(ca.selectedCropOrAnimalRemove)">
-                Queue Crop/Animal for Removal from Property
-            </button>
+            <div>
+                <select ng-model="ca.selectedCropOrAnimalRemove" ng-options="x for x in obj.farmOptions"></select>
+                <button ng-click="toRemove.push(ca.selectedCropOrAnimalRemove)">
+                    Queue Crop/Animal for Removal from Property
+                </button>
+            </div>
             <p>Current crops: {{obj.crops}}</p>
             <p>Current animals: {{obj.animals}}</p>
 
             <p ng-show="toAdd.length > 0">Crops and animals to be added on save: {{toAdd}}</p>
             <p ng-show="toRemove.length > 0">Crops and animals to be removed on save: {{toRemove}}</p>
-
-            <button ng-click="clearQueues()">Undo</button>
+            <p ng-show="queueError" style="color: red">Queue deletion error. Make sure you are leaving at least one item.</p>
+            <button ng-click="clearQueues()">Reset Queues</button>
             <br><br><br>
         </div>
         <hr>
@@ -74,8 +77,7 @@
 
         <button ng-click="updateProperty()" class="btn btn-primary">Save Changes</button>
         <p ng-show="nullErrors" style="color: red">Please ensure all fields are filled out.</p>
-        <p ng-show="success" style="color: blue">Property successfully updated.</p>
-        <p ng-show="otherErrors != null" style="color:red" ng-bind-html="otherErrors.data">
-        </p>
+        <p ng-show="success" style="color: blue">Property successfully updated. {{toChange}}</p>
+        <p ng-show="otherErrors != null" style="color:red">{{otherErrors}}</p>
     </div>
 </div>

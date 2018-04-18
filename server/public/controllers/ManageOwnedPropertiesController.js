@@ -1,5 +1,5 @@
 angular.module('app').controller('ManageOwnedPropertiesCtrl', function($scope, $rootScope, OwnerSinglePropertyFactory,
-    ManagePropertyFactory, RequestFarmItemFactory, $state, $stateParams, FarmItemFactory) {
+    ManagePropertyFactory, RequestFarmItemFactory, $state, $stateParams, FarmItemFactory, $http) {
     $scope.obj = {};
     $scope.ca = {};
 
@@ -9,6 +9,7 @@ angular.module('app').controller('ManageOwnedPropertiesCtrl', function($scope, $
         Garden: ['Vegetable', 'Flower'],
         Orchard: ['Fruit', 'Nut']
     };
+    $scope.availableCrops = [];
 
     $scope.isPublicOptions = [true, false];
     $scope.isCommercialOptions = [true, false];
@@ -16,6 +17,7 @@ angular.module('app').controller('ManageOwnedPropertiesCtrl', function($scope, $
     $scope.confirmErrors = false;
     $scope.nullErrors = false;
     $scope.otherErrors = null;
+    $scope.queueError = false;
     $scope.success = false;
 
     $scope.toAdd = [];
@@ -23,6 +25,52 @@ angular.module('app').controller('ManageOwnedPropertiesCtrl', function($scope, $
 
     $scope.farmItemOptions = [];
     $scope.farmOptions = [];
+
+    function loadCrops() {
+        if ($scope.obj.type === 'Garden') {
+            $http({ method: 'GET', url: '/api/crops/garden' }).then(function success(res) {
+                tmp = [];
+                for (var crop of res.data) {
+                    tmp.push(crop.name);
+                }
+                $scope.availableCrops = tmp;
+            }, function error() {
+
+            });
+        }
+
+        if ($scope.obj.type === 'Orchard') {
+            $http({ method: 'GET', url: '/api/crops/orchard' }).then(function success(res) {
+                tmp = [];
+                for (var crop of res.data) {
+                    tmp.push(crop.name);
+                }
+                $scope.availableCrops = tmp;
+            }, function error() {
+
+            });
+        }
+
+        if ($scope.obj.type === 'Farm') {
+            $http({ method: 'GET', url: '/api/crops/' }).then(function success(res) {
+                for (var crop of res.data) {
+                    if (!$scope.availableCrops.includes(crop.name)) {
+                        $scope.availableCrops.push(crop.name);
+                    }
+                }
+            }, function error() {
+
+            });
+            $http({ method: 'GET', url: '/api/animals/' }).then(function success(res) {
+                for (var animal of res.data) {
+                    $scope.availableCrops.push(animal.name);
+                }
+                $scope.availableAnimals = res.data;
+            }, function error() {
+
+            });
+        }
+    }
 
     function loadProperty() {
         var currentProperty = OwnerSinglePropertyFactory.getPropertyById({
@@ -46,10 +94,13 @@ angular.module('app').controller('ManageOwnedPropertiesCtrl', function($scope, $
 
             $scope.origProperty = JSON.parse(JSON.stringify(data));
             $scope.obj = JSON.parse(JSON.stringify(data));
+            loadCrops();
         })
     }
-
     loadProperty();
+
+
+
     FarmItemFactory.animals.getAnimals({}, function(data) {
         if (data && $scope.obj.type === 'Farm') {
             $scope.animalOptions = data;
@@ -99,20 +150,56 @@ angular.module('app').controller('ManageOwnedPropertiesCtrl', function($scope, $
                 }
 
                 if ($scope.toRemove.length > 0) {
+                    let c = [];
+                    let a = [];
+
+                    for (let item of $scope.toRemove) {
+                        if ($scope.obj.crops.split(',').includes(item)) {
+                            c.push(item);
+                        }
+                        if ($scope.obj.animals.split(',').includes(item)) {
+                            a.push(item);
+                        }
+                    }
+
+                    if ($scope.obj.crops.split(',').length - c.length === 0) {
+                        $scope.queueError = true;
+                        $scope.clearQueues();
+                        return;
+                    }
+
+                    if ($scope.obj.type === 'Farm') {
+                        if ($scope.obj.animals.split(',').length - a.length === 0) {
+                            $scope.queueError = true;
+                            $scope.clearQueues();
+                            return;
+                        }
+                    }
+
                     toChange.remove_farm_items = $scope.toRemove.slice(0);
+                    $scope.queueError = false;
                 }
 
-                console.log(toChange);
+
                 var res = ManagePropertyFactory.updateProperty(toChange, function() {
                     $scope.success = true;
                     $scope.otherErrors = null;
+                    $scope.queueError = false;
+
                     $scope.toAdd = [];
                     $scope.toRemove = [];
+
+                    $scope.toChange = toChange;
+                    delete $scope.toChange["property_id"];
+                    delete $scope.toChange["username"];
 
                     loadProperty();
                 }, function(err) {
                     $scope.success = false;
                     $scope.otherErrors = err;
+
+                    $scope.toAdd = [];
+                    $scope.toRemove = [];
                 });
         } else {
             $scope.nullErrors = true;
