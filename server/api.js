@@ -181,31 +181,13 @@ api.post('/api/owners', function(req, res) {
     Get owner's properties
 */
 api.get('/api/owners/:owner_id/own_properties', function(req, res) {
-    let sql = 'SELECT * FROM OwnerPropertiesView WHERE owner_id = ?';
-    let inserts = [ req.params.owner_id ];
-    if(req.query.filter) {
-        let filter = req.query.filter.split(':');
-        if(filter[1].indexOf('-') != -1) { // range filter
-            let range = filter[1].split('-');
-            if(range[0].length != 0) {
-                sql += ' AND ?? >= ?';
-                inserts.push(filter[0], range[0]);
-            }
-            if(range[1].length != 0) {
-                sql += ' AND ?? <= ?';
-                inserts.push(filter[0], range[1]);
-            }
-        }
-        else {  // exact filter
-            sql += ' AND ?? = ?';
-            inserts.push(filter[0], filter[1]);
-        }
-    }
-    if(req.query.sortby) {
-        let sortby = req.query.sortby.split(',');
-        sql += ` ORDER BY ?? ${(sortby.length > 1 && sortby[1] == 'desc' ? 'DESC' : 'ASC')}`;
-        inserts.push(sortby[0]);
-    }
+    let fssql, fsinserts;
+    let subs = ["name", "st_address", "city", "zip", "type"];
+    [fssql, fsinserts] = filterAndSort(req.query, subs);
+    let sql = 'SELECT * FROM OwnerPropertiesView WHERE owner_id = ?' + fssql;
+    let inserts = [ req.params.owner_id, ...fsinserts ];
+    console.log(sql, inserts);
+    
     db.query(sql, inserts).then(function(properties) {
         res.status(200).send(properties);
     }).catch(function(err) {
@@ -217,31 +199,12 @@ api.get('/api/owners/:owner_id/own_properties', function(req, res) {
     Get other owners' properties
 */
 api.get('/api/owners/:owner_id/other_properties', function(req, res) {
-    let sql = 'SELECT * FROM OwnerPropertiesView WHERE NOT owner_id = ? AND valid = 1';
-    let inserts = [ req.params.owner_id ];
-    if(req.query.filter) {
-        let filter = req.query.filter.split(':');
-        if(filter[1].indexOf('-') != -1) { // range filter
-            let range = filter[1].split('-');
-            if(range[0].length != 0) {
-                sql += ' AND ?? >= ?';
-                inserts.push(filter[0], range[0]);
-            }
-            if(range[1].length != 0) {
-                sql += ' AND ?? <= ?';
-                inserts.push(filter[0], range[1]);
-            }
-        }
-        else {  // exact filter
-            sql += ' AND ?? = ?';
-            inserts.push(filter[0], filter[1]);
-        }
-    }
-    if(req.query.sortby) {
-        let sortby = req.query.sortby.split(',');
-        sql += ` ORDER BY ?? ${(sortby.length > 1 && sortby[1] == 'desc' ? 'DESC' : 'ASC')}`;
-        inserts.push(sortby[0]);
-    }
+    let fssql, fsinserts;
+    let subs = ["name", "st_address", "city", "zip", "type"];
+    [fssql, fsinserts] = filterAndSort(req.query, subs);
+    let sql = 'SELECT * FROM OwnerPropertiesView WHERE NOT owner_id = ? AND valid = 1' + fssql;
+    let inserts = [ req.params.owner_id, ...fsinserts ];
+    
     db.query(sql, inserts).then(function(properties) {
         res.status(200).send(properties);
     }).catch(function(err) {
@@ -597,38 +560,19 @@ api.get('/api/users', function(req, res) {
     Get all visitors, searchable and sortable
 */
 api.get('/api/visitors', function(req, res) {
+    let fssql, fsinserts;
+    let subs = ["username", "email"];
+    [fssql, fsinserts] = filterAndSort(req.query, subs);
     let sql = `
         SELECT
             u.username,
             u.email,
             (SELECT COUNT(*) FROM VISITS WHERE visitor_id = u.username) AS logged_visits
         FROM USER u
-        WHERE account_type = 'Visitor'
+        WHERE account_type = 'Visitor' ${fssql}
     `;
-    let inserts = [];
-    if(req.query.filter) {
-        let filter = req.query.filter.split(':');
-        if(filter[1].indexOf('-') != -1) { // range filter
-            let range = filter[1].split('-');
-            if(range[0].length != 0) {
-                sql += ' AND ?? >= ?';
-                inserts.push(filter[0], range[0]);
-            }
-            if(range[1].length != 0) {
-                sql += ' AND ?? <= ?';
-                inserts.push(filter[0], range[1]);
-            }
-        }
-        else {  // exact filter
-            sql += ' AND ?? = ?';
-            inserts.push(filter[0], filter[1]);
-        }
-    }
-    if(req.query.sortby) {
-        let sortby = req.query.sortby.split(',');
-        sql += ` ORDER BY ?? ${(sortby.length > 1 && sortby[1] == 'desc' ? 'DESC' : 'ASC')}`;
-        inserts.push(sortby[0]);
-    }
+    let inserts = fsinserts;
+    
     db.query(sql, inserts).then(function(visitors) {
         res.status(200).send(visitors);
     }).catch(function(err) {
@@ -640,38 +584,19 @@ api.get('/api/visitors', function(req, res) {
     Get a list of all owners, searchable and sortable
 */
 api.get('/api/owners', function(req, res) {
+    let fssql, fsinserts;
+    let subs = ["username", "email"];
+    [fssql, fsinserts] = filterAndSort(req.query, subs);
     let sql = `
         SELECT
             u.username,
             u.email,
             (SELECT COUNT(*) FROM PROPERTY WHERE owner_id = u.username) AS num_properties
         FROM USER u
-        WHERE account_type = 'Owner'
+        WHERE account_type = 'Owner' ${fssql}
     `;
-    let inserts = [];
-    if(req.query.filter) {
-        let filter = req.query.filter.split(':');
-        if(filter[1].indexOf('-') != -1) { // range filter
-            let range = filter[1].split('-');
-            if(range[0].length != 0) {
-                sql += ' AND ?? >= ?';
-                inserts.push(filter[0], range[0]);
-            }
-            if(range[1].length != 0) {
-                sql += ' AND ?? <= ?';
-                inserts.push(filter[0], range[1]);
-            }
-        }
-        else {  // exact filter
-            sql += ' AND ?? = ?';
-            inserts.push(filter[0], filter[1]);
-        }
-    }
-    if(req.query.sortby) {
-        let sortby = req.query.sortby.split(',');
-        sql += ` ORDER BY ?? ${(sortby.length > 1 && sortby[1] == 'desc' ? 'DESC' : 'ASC')}`;
-        inserts.push(sortby[0]);
-    }
+    let inserts = fsinserts;
+    
     db.query(sql, inserts).then(function(owners) {
         res.status(200).send(owners);
     }).catch(function(err) {
@@ -683,35 +608,16 @@ api.get('/api/owners', function(req, res) {
     View all confirmed properties, searchable and sortable
 */
 api.get('/api/properties/confirmed', function(req, res) {
+    let fssql, fsinserts;
+    let subs = ["name", "st_address", "city", "zip", "type", "approved_by_admin"];
+    [fssql, fsinserts] = filterAndSort(req.query, subs);
     let sql = `
         SELECT *
         FROM AdminPropertiesView
-        WHERE approved_by_admin IS NOT NULL
+        WHERE approved_by_admin IS NOT NULL ${fssql}
     `;
-    let inserts = [];
-    if(req.query.filter) {
-        let filter = req.query.filter.split(':');
-        if(filter[1].indexOf('-') != -1) { // range filter
-            let range = filter[1].split('-');
-            if(range[0].length != 0) {
-                sql += ' AND ?? >= ?';
-                inserts.push(filter[0], range[0]);
-            }
-            if(range[1].length != 0) {
-                sql += ' AND ?? <= ?';
-                inserts.push(filter[0], range[1]);
-            }
-        }
-        else {  // exact filter
-            sql += ' AND ?? = ?';
-            inserts.push(filter[0], filter[1]);
-        }
-    }
-    if(req.query.sortby) {
-        let sortby = req.query.sortby.split(',');
-        sql += ` ORDER BY ?? ${(sortby.length > 1 && sortby[1] == 'desc' ? 'DESC' : 'ASC')}`;
-        inserts.push(sortby[0]);
-    }
+    let inserts = fsinserts;
+    
     db.query(sql, inserts).then(function(properties) {
         res.status(200).send(properties);
     }).catch(function(err) {
@@ -723,6 +629,9 @@ api.get('/api/properties/confirmed', function(req, res) {
     View all unconfirmed properties, searchable and sortable
 */
 api.get('/api/properties/unconfirmed', function(req, res) {
+    let fssql, fsinserts;
+    let subs = ["name", "st_address", "city", "zip", "type", "owner_id"];
+    [fssql, fsinserts] = filterAndSort(req.query, subs);
     let sql = `
         SELECT
             name,
@@ -736,32 +645,10 @@ api.get('/api/properties/unconfirmed', function(req, res) {
             property_id,
             owner_id
         FROM AdminPropertiesView
-        WHERE approved_by_admin IS NULL
+        WHERE approved_by_admin IS NULL ${fssql}
     `;
-    let inserts = [];
-    if(req.query.filter) {
-        let filter = req.query.filter.split(':');
-        if(filter[1].indexOf('-') != -1) { // range filter
-            let range = filter[1].split('-');
-            if(range[0].length != 0) {
-                sql += ' AND ?? >= ?';
-                inserts.push(filter[0], range[0]);
-            }
-            if(range[1].length != 0) {
-                sql += ' AND ?? <= ?';
-                inserts.push(filter[0], range[1]);
-            }
-        }
-        else {  // exact filter
-            sql += ' AND ?? = ?';
-            inserts.push(filter[0], filter[1]);
-        }
-    }
-    if(req.query.sortby) {
-        let sortby = req.query.sortby.split(',');
-        sql += ` ORDER BY ?? ${(sortby.length > 1 && sortby[1] == 'desc' ? 'DESC' : 'ASC')}`;
-        inserts.push(sortby[0]);
-    }
+    let inserts = fsinserts;
+    
     db.query(sql, inserts).then(function(properties) {
         res.status(200).send(properties);
     }).catch(function(err) {
@@ -773,37 +660,18 @@ api.get('/api/properties/unconfirmed', function(req, res) {
     View all approved farm items, searchable and sortable
 */
 api.get('/api/farm_items/approved', function(req, res) {
+    let fssql, fsinserts;
+    let subs = ["name", "type"];
+    [fssql, fsinserts] = filterAndSort(req.query, subs);
     sql = `
         SELECT
             name,
             type
         FROM FARM_ITEM
-        WHERE status = 1
+        WHERE status = 1 ${fssql}
     `;
-    let inserts = [];
-    if(req.query.filter) {
-        let filter = req.query.filter.split(':');
-        if(filter[1].indexOf('-') != -1) { // range filter
-            let range = filter[1].split('-');
-            if(range[0].length != 0) {
-                sql += ' AND ?? >= ?';
-                inserts.push(filter[0], range[0]);
-            }
-            if(range[1].length != 0) {
-                sql += ' AND ?? <= ?';
-                inserts.push(filter[0], range[1]);
-            }
-        }
-        else {  // exact filter
-            sql += ' AND ?? = ?';
-            inserts.push(filter[0], filter[1]);
-        }
-    }
-    if(req.query.sortby) {
-        let sortby = req.query.sortby.split(',');
-        sql += ` ORDER BY ?? ${(sortby.length > 1 && sortby[1] == 'desc' ? 'DESC' : 'ASC')}`;
-        inserts.push(sortby[0]);
-    }
+    let inserts = fsinserts;
+    
     db.query(sql, inserts).then(function(farmitems) {
         res.status(200).send(farmitems);
     }).catch(function(err) {
@@ -815,37 +683,18 @@ api.get('/api/farm_items/approved', function(req, res) {
     View all pending farm items, searchable and sortable
 */
 api.get('/api/farm_items/pending', function(req, res) {
+    let fssql, fsinserts;
+    let subs = ["name", "type"];
+    [fssql, fsinserts] = filterAndSort(req.query, subs);
     sql = `
         SELECT
             name,
             type
         FROM FARM_ITEM
-        WHERE status = 0
+        WHERE status = 0 ${fssql}
     `;
-    let inserts = [];
-    if(req.query.filter) {
-        let filter = req.query.filter.split(':');
-        if(filter[1].indexOf('-') != -1) { // range filter
-            let range = filter[1].split('-');
-            if(range[0].length != 0) {
-                sql += ' AND ?? >= ?';
-                inserts.push(filter[0], range[0]);
-            }
-            if(range[1].length != 0) {
-                sql += ' AND ?? <= ?';
-                inserts.push(filter[0], range[1]);
-            }
-        }
-        else {  // exact filter
-            sql += ' AND ?? = ?';
-            inserts.push(filter[0], filter[1]);
-        }
-    }
-    if(req.query.sortby) {
-        let sortby = req.query.sortby.split(',');
-        sql += ` ORDER BY ?? ${(sortby.length > 1 && sortby[1] == 'desc' ? 'DESC' : 'ASC')}`;
-        inserts.push(sortby[0]);
-    }
+    let inserts = fsinserts;
+    
     db.query(sql, inserts).then(function(farmitems) {
         res.status(200).send(farmitems);
     }).catch(function(err) {
@@ -910,36 +759,19 @@ api.delete('/api/visitors/:id/visits', function(req, res) {
     Get all public, confirmed properties from a visitor's view, searchable, sortable
 */
 api.get('/api/visitors/properties', function(req, res) {
+    let fssql, fsinserts;
+    let subs = ["name", "st_address", "city", "zip", "type"];
+    [fssql, fsinserts] = filterAndSort(req.query, subs);
     let sql = `
         SELECT *
         FROM VisitorPropertiesView
     `;
     let inserts = [];
-    if(req.query.filter) {
-        sql += ' WHERE';
-        let filter = req.query.filter.split(':');
-        if(filter[1].indexOf('-') != -1) { // range filter
-            let range = filter[1].split('-');
-            if(range[0].length != 0) {
-                sql += ' ?? >= ?';
-                inserts.push(filter[0], range[0]);
-            }
-            if(range[1].length != 0) {
-                if(range[0].length != 0) sql += ' AND';
-                sql += ' ?? <= ?';
-                inserts.push(filter[0], range[1]);
-            }
-        }
-        else {  // exact filter
-            sql += ' ?? = ?';
-            inserts.push(filter[0], filter[1]);
-        }
+    if(fssql) {
+        sql += ` WHERE ${fssql.slice(4)}`;
+        inserts = fsinserts;
     }
-    if(req.query.sortby) {
-        let sortby = req.query.sortby.split(',');
-        sql += ` ORDER BY ?? ${(sortby.length > 1 && sortby[1] == 'desc' ? 'DESC' : 'ASC')}`;
-        inserts.push(sortby[0]);
-    }
+    
     db.query(sql, inserts).then(function(properties) {
         res.status(200).send(properties);
     }).catch(function(err) {
@@ -1028,3 +860,39 @@ api.delete('/api/properties/:id', function(req, res) {
 
 api.listen(config.api.port);
 console.log(`Server running on ${config.api.url}:${config.api.port}`);
+
+
+function filterAndSort(query, substringables) {
+    let sql = "";
+    let inserts = [];
+    if(query.filter) {
+        let filter = query.filter.split(':');
+        if(filter[1].indexOf('-') != -1) { // range filter
+            let range = filter[1].split('-');
+            if(range[0].length != 0) {
+                sql += ' AND ?? >= ?';
+                inserts.push(filter[0], range[0]);
+            }
+            if(range[1].length != 0) {
+                sql += ' AND ?? <= ?';
+                inserts.push(filter[0], range[1]);
+            }
+        }
+        else {  // exact filter
+            if(substringables && substringables.includes(filter[0])) {
+                sql += ' AND ?? LIKE ?';
+                inserts.push(filter[0], "%" + filter[1] + "%");
+            }
+            else {
+                sql += ' AND ?? = ?';
+                inserts.push(filter[0], filter[1]);
+            }
+        }
+    }
+    if(query.sortby) {
+        let sortby = query.sortby.split(',');
+        sql += ` ORDER BY ?? ${(sortby.length > 1 && sortby[1] == 'desc' ? 'DESC' : 'ASC')}`;
+        inserts.push(sortby[0]);
+    }
+    return [sql, inserts];
+}
