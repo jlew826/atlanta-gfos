@@ -1,5 +1,5 @@
 <div style="padding-left:20px;">
-    <button ui-sref="owned_properties">Back (Don't Save)</button>
+    <button ng-click="back()">Back (Don't Save)</button>
 
     <h3>Manage {{origProperty.name}}</h3>
     <div ng-if="farmItemOptions.length > 0"> <!--only show when loaded-->
@@ -74,8 +74,14 @@
         <hr>
 
         <button ng-click="updateProperty()" class="btn btn-primary">Save Changes</button>
+        <button ng-click="deleteProperty(obj.property_id)" style="margin-left:50px" class="btn btn-danger">Delete Property</button>
+        
         <p ng-show="nullErrors" style="color: red">Please ensure all fields are filled out.</p>
         <p ng-show="success" style="color: blue">Property successfully updated. {{toChange}}</p>
         <p ng-show="otherErrors != null" style="color:red">{{otherErrors}}</p>
+
+        <p ng-show="propertyDeleteFailire" style="color:red">Deletion Failed. Try again.</p>
+
+
     </div>
 </div>

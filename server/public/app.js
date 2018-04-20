@@ -42,6 +42,9 @@ app.config(['$stateProvider', '$urlRouterProvider', function($stateProvider, $ur
         })
         .state('manage_owned_properties', {
             url: '/manage_owned_properties/{propertyId}',
+            params: {
+                referrer: null
+            },
             templateUrl: 'public/partials/manage_owned_properties.html',
             controller: 'ManageOwnedPropertiesCtrl'
         })
@@ -54,5 +57,26 @@ app.config(['$stateProvider', '$urlRouterProvider', function($stateProvider, $ur
             url: '/other_owner_properties',
             templateUrl: 'public/partials/other_owner_properties.html',
             controller: 'OtherOwnerPropertiesCtrl'
+        })
+        .state('admin_home', {
+            url: '/admin_home',
+            templateUrl: 'public/partials/admin_home.html',
+            controller: 'AdminHomeCtrl'
+        })
+        .state('admin_view_users', {
+            url: '/admin_view_users',
+            params: {
+                account_type: null
+            },
+            templateUrl: 'public/partials/admin_view_users.html',
+            controller: 'AdminViewUsersCtrl'
+        })
+        .state('admin_view_properties', {
+            url: '/admin_view_properties',
+            params: {
+                is_confirmed: null
+            },
+            templateUrl: 'public/partials/admin_view_properties.html',
+            controller: 'AdminViewPropertiesCtrl'
         });
 }]);

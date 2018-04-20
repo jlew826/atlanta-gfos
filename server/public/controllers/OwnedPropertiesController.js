@@ -6,6 +6,7 @@ angular.module('app').controller('OwnedPropertiesCtrl', function($http, $scope, 
 
     $scope.obj = {};
     $scope.filterOptions = ['name', 'city', 'type', 'num_visits', 'avg_rating'];
+    $scope.filterRangeOptions = ['num_visits', 'avg_rating'];
     $scope.filterQuery = '';
 
     $rootScope.currentUser = $rootScope.currentUser ? $rootScope.currentUser : {

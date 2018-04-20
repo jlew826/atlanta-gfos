@@ -15,6 +15,8 @@ angular.module('app').controller('LoginCtrl', function($scope, $rootScope, $stat
                         $state.go('view_properties');
                     } else if (user.account_type === 'Owner') {
                         $state.go('owned_properties');
+                    } else if (user.account_type === 'Admin') {
+                        $state.go('admin_home');
                     }
                 }
             }, function() {

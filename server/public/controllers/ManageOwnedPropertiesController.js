@@ -26,6 +26,8 @@ angular.module('app').controller('ManageOwnedPropertiesCtrl', function($scope, $
     $scope.farmItemOptions = [];
     $scope.farmOptions = [];
 
+    $scope.referredByAdmin = $stateParams.referrer;
+
     function loadCrops() {
         if ($scope.obj.type === 'Garden') {
             $http({ method: 'GET', url: '/api/crops/garden' }).then(function success(res) {
@@ -139,7 +141,6 @@ angular.module('app').controller('ManageOwnedPropertiesCtrl', function($scope, $
                 }
 
                 if (toChange.farmOptions) {
-                    console.log(toChange.farmOptions);
                     toChange.farmOptions = null;
                 }
 
@@ -180,7 +181,12 @@ angular.module('app').controller('ManageOwnedPropertiesCtrl', function($scope, $
                     $scope.queueError = false;
                 }
 
+                if ($rootScope.currentUser.account_type === 'Admin') {
+                    toChange.approved_by_admin = $rootScope.currentUser.username;
+                }
 
+                console.log(toChange);
+                
                 var res = ManagePropertyFactory.updateProperty(toChange, function() {
                     $scope.success = true;
                     $scope.otherErrors = null;
@@ -246,6 +252,27 @@ angular.module('app').controller('ManageOwnedPropertiesCtrl', function($scope, $
     $scope.clearQueues = function() {
         $scope.toAdd = [];
         $scope.toRemove = [];
+    }
+
+    $scope.back = function() {
+        if ($rootScope.currentUser.account_type === 'Admin') {
+            $state.go('admin_view_properties', { propertyId: null, is_confirmed: $stateParams.referrer });
+        } else {
+            $state.go('owned_properties');
+        }
+    }
+
+    $scope.deleteProperty = function(id) {
+        $http({ method: 'DELETE', url: '/api/properties/' + id}).then(function success(res) {
+            console.log('Deleted property ' + id);
+            $scope.propertyDeleteSuccess = true;
+            $scope.propertyDeleteFailure = false;
+
+            $scope.back();
+        }, function error() {
+            $scope.propertyDeleteSuccess = false;
+            $scope.propertyDeleteFailure = true;
+        });
     }
 
 });

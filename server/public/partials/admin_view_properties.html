@@ -1,0 +1,114 @@
+<div ng-controller="AdminViewPropertiesCtrl" style="padding-left: 5px">
+    <h3>All {{isConfirmed ? 'Confirmed' : 'Unconfirmed'}} Properties</h3>
+    <button ui-sref="admin_home" style="display:inline">Back</button>
+    <button ng-click="logOut()" style="display:inline">Log Out</button>
+
+    <hr>
+    <p style="display:inline">Filter By:</p>
+    <select ng-if="!isConfirmed" ng-model="obj.filterOption"
+            ng-options="x for x in filterUnconfirmedOptions" style="display:inline"></select>
+    <select ng-if="isConfirmed" ng-model="obj.filterOption"
+            ng-options="x for x in filterConfirmedOptions" style="display:inline"></select>
+    <input ng-model="obj.filterQuery"
+           placeholder="Query" style="display:inline"></input>
+
+    <div ng-show="obj.filterOption === 'num_visits' || obj.filterOption === 'avg_rating'">
+        <p style="display:inline">Min:</p>
+        <input ng-model="minFil" ng-init="minFil=0" placeholder="Min Avg Rating." style="display:inline"></input>
+
+        <p style="display:inline">Max:</p>
+        <input ng-model="maxFil" ng-init="maxFil=5" placeholder="Max Avg Rating." style="display:inline"></input>
+    </div>
+
+    <button ng-click="filterBy(obj.filterOption, obj.filterQuery)">Filter Now</button>
+    <hr>
+
+    <table ng-if="!isConfirmed" class="table table-hover">
+        <tr>
+            <th ng-click="changeOrder('name')"
+            ng-class="order === 'name' ? 'sorting-by' : 'sorting-by-disabled'">
+                Name
+            </th>
+            <th>Address</th>
+            <th ng-click="changeOrder('city')"
+                ng-class="order === 'city' ? 'sorting-by' : 'sorting-by-disabled'">
+                City
+            </th>
+            <th>Zip</th>
+            <th ng-click="changeOrder('size')"
+                ng-class="order === 'size' ? 'sorting-by' : 'sorting-by-disabled'">Size</th>
+            <th>
+                Type
+            </th>
+            <th>Public</th>
+            <th>Commercial</th>
+            <th>ID</th>
+            <th ng-click="changeOrder('owner_id')"
+                ng-class="order === 'owner_id' ? 'sorting-by' : 'sorting-by-disabled'">
+                Owner
+            </th>
+        </tr>
+        <!--<tr ng-repeat="property in confirmedProperties | filter: { is_public: 1, is_commercial: 1 }">-->
+        <tr ng-repeat="property in shownProperties | orderBy:order:asc"
+            ng-click="manageProperty(property.property_id)"
+            ng-cloak>
+            <td>{{property.name}}</td>
+            <td>{{property.st_address}}</td>
+            <td>{{property.city}}</td>
+            <td>{{property.zip}}</td>
+            <td>{{property.size}}</td>
+            <td>{{property.type}}</td>
+            <td>{{property.is_public ? "True" : "False"}}</td>
+            <td>{{property.is_commercial ? "True" : "False"}}</td>
+            <td>{{property.property_id}}</td>
+            <td>{{property.owner_id}}</td>
+        </tr>
+    </table>
+
+    <table ng-if="isConfirmed" class="table table-hover">
+        <tr>
+            <th ng-click="changeOrder('name')"
+            ng-class="order === 'name' ? 'sorting-by' : 'sorting-by-disabled'">
+                Name
+            </th>
+            <th>Address</th>
+            <th>
+                City
+            </th>
+            <th ng-click="changeOrder('zip')"
+                ng-class="order === 'zip' ? 'sorting-by' : 'sorting-by-disabled'">Zip</th>
+            <th>Size</th>
+            <th ng-click="changeOrder('type')"
+                ng-class="order === 'type' ? 'sorting-by' : 'sorting-by-disabled'">
+                Type
+            </th>
+            <th>Public</th>
+            <th>Commercial</th>
+            <th>ID</th>
+            <th ng-click="changeOrder('approved_by_admin')"
+                ng-class="order === 'approved_by_admin' ? 'sorting-by' : 'sorting-by-disabled'">
+                Verified By
+            </th>
+            <th ng-click="changeOrder('avg_rating')"
+                ng-class="order === 'avg_rating' ? 'sorting-by' : 'sorting-by-disabled'">
+                Avg. Rating
+            </th>
+        </tr>
+        <!--<tr ng-repeat="property in confirmedProperties | filter: { is_public: 1, is_commercial: 1 }">-->
+        <tr ng-repeat="property in shownProperties | orderBy:order:asc"
+            ng-click="manageProperty(property.property_id)"
+            ng-cloak>
+            <td>{{property.name}}</td>
+            <td>{{property.st_address}}</td>
+            <td>{{property.city}}</td>
+            <td>{{property.zip}}</td>
+            <td>{{property.size}}</td>
+            <td>{{property.type}}</td>
+            <td>{{property.is_public ? "True" : "False"}}</td>
+            <td>{{property.is_commercial ? "True" : "False"}}</td>
+            <td>{{property.property_id}}</td>
+            <td>{{property.approved_by_admin}}</td>
+            <td>{{property.avg_rating || 'N/A'}}</td>
+        </tr>
+    </table>
+</div>

@@ -1,0 +1,8 @@
+<div ng-controller="AdminHomeCtrl" style="padding-left: 5px">
+    <h3>Welcome <b>Admin</b> {{currentUser.username}}</h3>
+    <button ng-click="logOut()" style="display:inline">Log Out</button>
+    <button ng-click="viewUsers('Visitor')" style="display:inline">View Visitors List</button>
+    <button ng-click="viewUsers('Owner')" style="display:inline">View Owners List</button>
+    <button ng-click="viewProperties(true)" style="display:inline">View Confirmed Properties</button>
+    <button ng-click="viewProperties(false)" style="display:inline">View Unconfirmed Properties</button>
+</div>

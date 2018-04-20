@@ -1,0 +1,67 @@
+<div ng-controller="AdminViewUsersCtrl" style="padding-left: 5px">
+    <button ui-sref="admin_home" style="display:inline">Back</button>
+    <h3>{{userType}}s List</h3>
+    <table class="table table-hover">
+
+        <p>Selected user: {{selectedUser}}</p>
+        <div ng-if="selectedUser && userType === 'Visitor'">
+            <button ng-click="deleteVisitorHistory(selectedUser)">Delete Log History</button>
+            <button ng-click="deleteUser(selectedUser)">Delete Visitor Account</button>
+
+
+            <p ng-show="logDeleteSuccess">Log history deletion succeeded!</p>
+            <p ng-show="logDeleteError">Log history deletion failed!</p>
+        </div>
+
+        <div ng-if="selectedUser && userType === 'Owner'">
+            <button ng-click="deleteUser(selectedUser)">Delete Owner Account</button>
+        </div>
+
+
+        <hr>
+        <p style="display:inline">Filter By:</p>
+        <select ng-if="userType === 'Visitor'"
+                ng-model="obj.filterOption"
+                ng-options="x for x in filterVisitorOptions" style="display:inline"></select>
+        <select ng-if="userType === 'Owner'"
+                ng-model="obj.filterOption"
+                ng-options="x for x in filterOwnerOptions" style="display:inline"></select>
+
+        <input ng-model="obj.filterQuery"
+               placeholder="Query" style="display:inline"></input>
+
+       <button ng-click="filterBy(obj.filterOption, obj.filterQuery)">Filter Now</button>
+       <hr>
+
+
+        <tr>
+            <th ng-click="changeOrder('username', obj.filterQuery)"
+                ng-class="order === 'username' ? 'sorting-by' : 'sorting-by-disabled'">Username</th>
+            <th ng-click="changeOrder('email', obj.filterQuery)"
+                ng-class="order === 'email' ? 'sorting-by' : 'sorting-by-disabled'">Email</th>
+            <th ng-click="changeOrder((userType === 'Visitor') ? 'logged_visits' : 'num_properties', obj.filterQuery)"
+                ng-class="order === 'logged_visits' ? 'sorting-by' : 'sorting-by-disabled'">
+                <p ng-show="userType === 'Visitor'">
+                    Logged Visits
+                </p>
+                <p ng-show="userType === 'Owner'">
+                    Num Properties
+                </p>
+            </th>
+        </tr>
+
+        <tr ng-repeat="v in userList | orderBy:order:asc"
+            ng-click="selectUserFromRow(v)" ng-cloak>
+            <td>{{v.username}}</td>
+            <td>{{v.email}}</td>
+            <td>
+                <p ng-show="userType === 'Visitor'">
+                    {{v.logged_visits}}
+                </p>
+                <p ng-show="userType === 'Owner'">
+                    {{v.num_properties}}
+                </p>
+            </td>
+        </tr>
+    </table>
+</div>
