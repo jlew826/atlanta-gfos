@@ -1,6 +1,5 @@
 <div style="padding-left:20px;">
-    <button ui-sref="owned_properties">Back</button>
-
+    <button ui-sref="owned_properties">Back (Don't Save)</button>
 
     <h3>Manage {{origProperty.name}}</h3>
     <div ng-if="farmItemOptions.length > 0"> <!--only show when loaded-->
@@ -73,7 +72,6 @@
         </div>
 
         <hr>
-
 
         <button ng-click="updateProperty()" class="btn btn-primary">Save Changes</button>
         <p ng-show="nullErrors" style="color: red">Please ensure all fields are filled out.</p>

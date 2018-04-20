@@ -4,35 +4,23 @@
     <button ui-sref="other_owner_properties" style="display:inline">View Other Properties</button>
     <button ui-sref="owner_add_property" style="display:inline">Add New Property</button>
 
-    <!--<input type="text" ng-model="query" placeholder="Filter by any attribute... "
-        style="font-size: 20px; height:75px; width: 400px; margin:0px auto; display:block; margin-bottom: 20px !important">-->
+    <hr>
+    <p style="display:inline">Filter By:</p>
+    <select ng-model="obj.filterOption" ng-options="x for x in filterOptions" style="display:inline"></select>
+    <input ng-show="!filterRangeOptions.includes(obj.filterOption)"
+           ng-model="obj.filterQuery"
+           placeholder="Query" style="display:inline"></input>
 
+    <div ng-show="obj.filterOption === 'num_visits' || obj.filterOption === 'avg_rating'">
+        <p style="display:inline">Min:</p>
+        <input ng-model="minFil" ng-init="minFil=0" placeholder="Min Avg Rating." style="display:inline"></input>
 
-        <hr>
+        <p style="display:inline">Max:</p>
+        <input ng-model="maxFil" ng-init="maxFil=5" placeholder="Max Avg Rating." style="display:inline"></input>
+    </div>
 
-        <input ng-model="filterName" placeholder="Filter by name." style="display:inline"></input>
-        <input ng-model="filterCity" placeholder="Filter by city." style="display:inline"></input>
-        <input ng-model="filterType" placeholder="Filter by type." style="display:inline"></input>
-        <input ng-model="filterNumVisits" placeholder="Filter by num_visits." style="display:inline"></input>
-
-        <hr>
-            <p>Filter by num visits:</p>
-
-            <p style="display:inline">Min num_visits:</p>
-            <input ng-model="minNumVisits" ng-init="minNumVisits=0" placeholder="Min Avg Rating." style="display:inline"></input>
-
-            <p style="display:inline">Max num_visits:</p>
-            <input ng-model="maxNumVisits" ng-init="maxNumVisits=5" placeholder="Max Avg Rating." style="display:inline"></input>
-        <hr>
-        <hr>
-            <p>Filter by average rating:</p>
-
-            <p style="display:inline">Min average rating:</p>
-            <input ng-model="minAvgRating" ng-init="minAvgRating=0" placeholder="Min Avg Rating." style="display:inline"></input>
-
-            <p style="display:inline">Max average rating:</p>
-            <input ng-model="maxAvgRating" ng-init="maxAvgRating=5" placeholder="Max Avg Rating." style="display:inline"></input>
-        <hr>
+    <button ng-click="filterBy(obj.filterOption, obj.filterQuery)">Filter Now</button>
+    <hr>
 
         <!-- General filter
         <input type="text" ng-model="query" placeholder="Filter by any attribute... "
@@ -68,11 +56,7 @@
             </th>
         </tr>
         <!--<tr ng-repeat="property in confirmedProperties | filter: { is_public: 1, is_commercial: 1 }">-->
-        <tr ng-repeat="property in ownedProperties | orderBy:order:asc |
-            filter: avgRatingFilter | filter: numVisitsFilter |
-            filter: { name: filterName } | filter: { city: filterCity } |
-            filter: { type: filterType } | filter: { num_visits: filterNumVisits } |
-            filter: { avg_rating: filterAvgRating }"
+        <tr ng-repeat="property in ownedProperties | orderBy:order:asc"
             ng-click="manageProperty(property.property_id)"
             ng-cloak>
             <td>{{property.name}}</td>

@@ -60,10 +60,7 @@ app.factory('PropertyFactory', function($resource) {
     return $resource('/api/visitors/properties', {}, {
 		getConfirmedProperties: {
 			method: 'GET',
-            isArray: true,
-            params: {
-                filter: '@filter'
-            }
+            isArray: true
 		}
 	});
 

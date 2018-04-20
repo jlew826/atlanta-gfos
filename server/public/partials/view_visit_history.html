@@ -3,12 +3,16 @@
 
     <table class="table table-hover">
         <tr>
-            <th>Name</th>
-            <th>Date Logged</th>
-            <th>Rating</th>
+            <th ng-click="changeOrder('name')"
+                ng-class="order === 'type' ? 'sorting-by' : 'sorting-by-disabled'">Name</th>
+            <th ng-click="changeOrder('date_added')"
+                ng-class="order === 'type' ? 'sorting-by' : 'sorting-by-disabled'">Date Logged</th>
+            <th ng-click="changeOrder('score')"
+                ng-class="order === 'type' ? 'sorting-by' : 'sorting-by-disabled'">Rating</th>
         </tr>
         <!--<tr ng-repeat="cf in confirmedProperties | filter: { is_public: 1, is_commercial: 1 }">-->
-        <tr ng-repeat="vh in visitHistory" ng-click="viewPropertyDetailFromHistory(vh.name)" ng-cloak>
+        <tr ng-repeat="vh in visitHistory | orderBy:order:asc"
+            ng-click="viewPropertyDetailFromHistory(vh.name)" ng-cloak>
             <td>{{vh.name}}</td>
             <td>{{vh.date_added | date:'MM/dd/yyyy'}}</td>
             <td>{{vh.score}}</td>
