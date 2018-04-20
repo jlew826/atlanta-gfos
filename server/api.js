@@ -186,7 +186,6 @@ api.get('/api/owners/:owner_id/own_properties', function(req, res) {
     [fssql, fsinserts] = filterAndSort(req.query, subs);
     let sql = 'SELECT * FROM OwnerPropertiesView WHERE owner_id = ?' + fssql;
     let inserts = [ req.params.owner_id, ...fsinserts ];
-    console.log(sql, inserts);
     
     db.query(sql, inserts).then(function(properties) {
         res.status(200).send(properties);
@@ -452,11 +451,17 @@ api.put('/api/properties/:prop_id', function(req, res) {
         SELECT account_type FROM USER WHERE username = ?
     `, [req.body.username]).then(function(account) {
         let atype = account[0].account_type;
+        if(atype == 'Visitor') {
+            res.status(403).send("Only admins and owners can modify properties");
+            return;
+        }
         let attrsql = `UPDATE PROPERTY SET approved_by_admin = ${atype == 'Admin' ? `'${req.body.username}'` : 'NULL'}`;
         let attrinserts = [];
+        let changed = false;
         for(let attr in req.body) {
             if(req.body.hasOwnProperty(attr)) {
                 if(attr == 'username') continue;
+                changed = true;
                 if(attr == 'add_farm_items') {
                     let sql = `INSERT INTO GROWS_RAISES VALUES `;
                     let inserts = [];
@@ -483,19 +488,25 @@ api.put('/api/properties/:prop_id', function(req, res) {
                 }
             }
         }
-        attrsql += ` WHERE property_id = ?`;
-        attrinserts.push(req.params.prop_id);
-        db.query(attrsql, attrinserts).then(function(result) {
-            db.query(`
-                DELETE FROM VISITS WHERE property_id = ?
-            `, [req.params.prop_id]).then(function(result) {
-                res.status(200).send("Success");
+        if(atype == 'Admin' || changed) {    // don't update status or delete visit history if owner clicks save with no changes
+            attrsql += ` WHERE property_id = ?`;
+            attrinserts.push(req.params.prop_id);
+            db.query(attrsql, attrinserts).then(function(result) {
+                if(changed) {               // don't delete visit history if admin clicks save with no changes
+                    db.query(`
+                        DELETE FROM VISITS WHERE property_id = ?
+                    `, [req.params.prop_id]).then(function(result) {
+                        res.status(200).send("Success");
+                    }).catch(function(err) {
+                        res.status(500).send(err);
+                    });
+                }
+                else res.status(200).send("Success");
             }).catch(function(err) {
                 res.status(500).send(err);
             });
-        }).catch(function(err) {
-            res.status(500).send(err);
-        });
+        }
+        else res.status(200).send("Success");
     }).catch(function(err) {
         res.status(500).send(err);
     });
