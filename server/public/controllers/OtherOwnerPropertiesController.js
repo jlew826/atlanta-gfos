@@ -16,12 +16,20 @@ angular.module('app').controller('OtherOwnerPropertiesCtrl', function($scope, $h
 
     function buildURI(attr, query) {
         var ret = '';
+        query = (query === undefined) ? '' : query;
+
         if (!attr) {
             return ret;
         }
+
+        if (attr === 'size') {
+            if (!query) {
+                return '';
+            }
+        }
         if (!$scope.filterRangeOptions.includes(attr)) {
             if (attr === 'is_public') {
-                query = (query[0].toLowerCase() === 't') ? 1 : 0; 
+                query = (query[0].toLowerCase() === 't') ? 1 : 0;
             }
             ret += '?filter=' + attr + ':' + query;
         } else {

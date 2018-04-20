@@ -26,6 +26,8 @@ angular.module('app').controller('ViewPropertiesCtrl', function($http, $scope, $
 
     function buildURI(attr, query) {
         var ret = '';
+        query = (query === undefined) ? '' : query;
+
         if (!attr) {
             return ret;
         }
@@ -36,6 +38,9 @@ angular.module('app').controller('ViewPropertiesCtrl', function($http, $scope, $
                 if (attr === 'num_visits') {
                     $scope.minFil = Math.floor($scope.minFil);
                     $scope.maxFil = Math.floor($scope.maxFil);
+                }
+                if (attr === 'avg_rating' && $scope.minFil == 0 && $scope.maxFil == 5) {
+                    return '';
                 }
                 ret += '?filter=' + attr + ':' + $scope.minFil + '-' + $scope.maxFil;
             }

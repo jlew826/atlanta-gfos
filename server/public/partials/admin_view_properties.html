@@ -9,7 +9,7 @@
             ng-options="x for x in filterUnconfirmedOptions" style="display:inline"></select>
     <select ng-if="isConfirmed" ng-model="obj.filterOption"
             ng-options="x for x in filterConfirmedOptions" style="display:inline"></select>
-    <input ng-model="obj.filterQuery"
+    <input ng-if="obj.filterOption !== 'avg_rating'" ng-model="obj.filterQuery"
            placeholder="Query" style="display:inline"></input>
 
     <div ng-show="obj.filterOption === 'num_visits' || obj.filterOption === 'avg_rating'">

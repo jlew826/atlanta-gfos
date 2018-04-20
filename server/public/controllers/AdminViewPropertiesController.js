@@ -46,9 +46,18 @@ angular.module('app').controller('AdminViewPropertiesCtrl', function($http, $roo
 
     function buildURI(attr, query) {
         var ret = '';
+        query = (query == undefined) ? '' : query;
+
         if (!attr) {
             return ret;
         }
+
+        if (attr === 'size') {
+            if (!query) {
+                return '';
+            }
+        }
+        
         if (!$scope.filterRangeOptions.includes(attr)) {
             ret += '?filter=' + attr + ':' + query;
         } else {
@@ -56,6 +65,10 @@ angular.module('app').controller('AdminViewPropertiesCtrl', function($http, $roo
                 if (attr === 'num_visits') {
                     $scope.minFil = Math.floor($scope.minFil);
                     $scope.maxFil = Math.floor($scope.maxFil);
+                }
+
+                if (attr === 'avg_rating' && $scope.minFil == 0 && $scope.maxFil == 5) {
+                    return '';
                 }
                 ret += '?filter=' + attr + ':' + $scope.minFil + '-' + $scope.maxFil;
             }

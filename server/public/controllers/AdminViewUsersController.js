@@ -38,6 +38,8 @@ angular.module('app').controller('AdminViewUsersCtrl', function($http, $rootScop
 
     function buildURI(attr, query) {
         var ret = '';
+        query = (query === undefined) ? '' : query;
+        
         if (!attr) {
             return ret;
         }
